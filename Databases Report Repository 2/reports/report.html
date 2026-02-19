@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Vladimir Paraschiv">
+
+<title>Homework 2 - ER Diagrams - Fall 2025</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="report_files/libs/quarto-html/quarto.js"></script>
+<script src="report_files/libs/quarto-html/popper.min.js"></script>
+<script src="report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="report_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="report_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="report_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="report_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="report_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Homework 2 - ER Diagrams - Fall 2025</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Vladimir Paraschiv <a href="mailto:paraschivv@vcu.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!--
+Update the link below to reflect YOUR repository.
+You will NOT be scored for your README unless you include this link.  The human grader
+will follow the link to the github repo to evaluate how it looks.
+
+FYI - this is an HTML-style comment that is ignored by Quarto and Pandoc.
+    You can add them anywhere to leave breadcrumbs for yourself!
+-->
+<p>[<a href="https://github.com/cmsc-vcu/cmsc408-fa2025-hw2-CaptnKristmas">Link to repository</a>]</p>
+<p>This assignments goal is to pick three problems and create Chen and Crow’s foot diagrams. These diagrams represent Entity Relation models that visually describe the attributes and relationships between the separate entitities.</p>
+<p>Entities are larger concepts. These larger concepts can then be broken down into several attributes that are important to discerning the entity. Each entity has a primary key, this is an attribute that identifies each individual entity from another. Say you need to manage students and their courses, a situation I model below, Students and Courses would be entities. There are many students in a school and many courses. In order to discern different students and different courses they each have primary key attributes, like studentID or courseID. Relationships are made between them based on necessities for the system. Such as each student can have many classes and classes can have many students, this for example is a many to many relationship.</p>
+<p>Entities are squares, attributes are ovals (primary keys are usually underlined or labled), and diamonds are relationships in Chen Diagrams. The numbers on the lines are the cardinality or how much of each must be inlcuded and how many can be included in that order. N or M represent many and are used interchangably. If you see both, it represents different many’s.</p>
+<p>In Crows Foot Diagrams tables titles are entities, attributes are listed under the table and the primary key is listed on the table in a separate column. There is also a separate column for the type of attribute, int or string etc. Their relationship is showed to the side. A trident represents many and two lines represent at least one.</p>
+<section id="er-modeling-exercises" class="level1">
+<h1>ER Modeling Exercises</h1>
+<section id="school-course-enrollment-system" class="level2">
+<h2 class="anchored" data-anchor-id="school-course-enrollment-system">School Course Enrollment System</h2>
+<p>Imagine a school that needs to manage Courses, Students, and enrollments. Each Course has a Course ID, title, and credits. Students have a Student ID, name, and enrollment date. Enrollments have an enrollment ID, enrollment date, and grade. A Student can enroll in multiple Courses, and each Course can have multiple Students. Each enrollment is associated with a single Student enrolling in a single Course.</p>
+<section id="conceptual-design-in-chen-notation" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-chen-notation">Conceptual design in Chen Notation</h3>
+<p>The diagram depicts a many to many relationship between Students and Courses resolved via the associative entity Enrollment. Courses and Students each have a one to many relationship with Enrollments. Students and Courses must each refer to exactly one Enrollment. Each of these entities has their own attributes. CourseID being the primary key for Course, EnrollementID being the primary key for Enrollements and StudentID being the primary key for Students.</p>
+<div class="cell" data-fig-width="100%" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-chen-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="NaN" height="480" viewbox="0.00 0.00 654.48 375.44" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 371.44)">
+<title>ER</title>
+<!-- Course -->
+<g id="node1" class="node">
+<title>Course</title>
+<polygon fill="none" stroke="black" points="157.47,-144.29 103.47,-144.29 103.47,-108.29 157.47,-108.29 157.47,-144.29"></polygon>
+<text text-anchor="middle" x="130.47" y="-123.29" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Course</text>
+</g>
+<!-- Enrollment -->
+<g id="node2" class="node">
+<title>Enrollment</title>
+<polygon fill="none" stroke="black" points="351.27,-253.41 290.29,-253.41 290.29,-217.41 351.27,-217.41 351.27,-253.41"></polygon>
+<text text-anchor="middle" x="320.78" y="-232.41" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Enrollment</text>
+</g>
+<!-- C&#45;E -->
+<g id="node13" class="node">
+<title>C-E</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="229.72,-187.73 202.61,-169.73 229.72,-151.73 256.84,-169.73 229.72,-187.73"></polygon>
+<text text-anchor="middle" x="229.72" y="-166.73" font-family="Helvetica,Arial,sans-serif" font-size="10.00">C-E</text>
+</g>
+<!-- Enrollment&#45;&#45;C&#45;E -->
+<g id="edge12" class="edge">
+<title>Enrollment--C-E</title>
+<path fill="none" stroke="black" d="M295.41,-217.11C278.36,-204.82 256.59,-189.11 242.89,-179.23"></path>
+<text text-anchor="middle" x="262.9" y="-201.17" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,n</text>
+</g>
+<!-- S&#45;E -->
+<g id="node14" class="node">
+<title>S-E</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="414.61,-192.93 387.61,-174.93 414.61,-156.93 441.61,-174.93 414.61,-192.93"></polygon>
+<text text-anchor="middle" x="414.61" y="-171.93" font-family="Helvetica,Arial,sans-serif" font-size="10.00">S-E</text>
+</g>
+<!-- Enrollment&#45;&#45;S&#45;E -->
+<g id="edge7" class="edge">
+<title>Enrollment--S-E</title>
+<path fill="none" stroke="black" d="M348.93,-217.26C366.1,-206.2 387.28,-192.55 400.86,-183.79"></path>
+<text text-anchor="middle" x="361.15" y="-203.53" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,n &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+</g>
+<!-- Student -->
+<g id="node3" class="node">
+<title>Student</title>
+<polygon fill="none" stroke="black" points="541.25,-151.13 487.25,-151.13 487.25,-115.13 541.25,-115.13 541.25,-151.13"></polygon>
+<text text-anchor="middle" x="514.25" y="-130.13" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Student</text>
+</g>
+<!-- Date0 -->
+<g id="node4" class="node">
+<title>Date0</title>
+<ellipse fill="none" stroke="black" cx="388.88" cy="-312.93" rx="49.56" ry="18"></ellipse>
+<text text-anchor="middle" x="388.88" y="-309.93" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Enrollment Date</text>
+</g>
+<!-- Date0&#45;&#45;Enrollment -->
+<g id="edge4" class="edge">
+<title>Date0--Enrollment</title>
+<path fill="none" stroke="black" d="M373.77,-295.72C362.8,-283.23 347.98,-266.37 336.8,-253.64"></path>
+</g>
+<!-- Date1 -->
+<g id="node5" class="node">
+<title>Date1</title>
+<ellipse fill="none" stroke="black" cx="596.95" cy="-204.67" rx="49.56" ry="18"></ellipse>
+<text text-anchor="middle" x="596.95" y="-201.67" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Enrollment Date</text>
+</g>
+<!-- Date1&#45;&#45;Student -->
+<g id="edge11" class="edge">
+<title>Date1--Student</title>
+<path fill="none" stroke="black" d="M577.35,-187.72C564.65,-176.73 548.11,-162.42 535.16,-151.22"></path>
+</g>
+<!-- CourseID (PK) -->
+<g id="node6" class="node">
+<title>CourseID (PK)</title>
+<ellipse fill="none" stroke="black" cx="46.2" cy="-196.28" rx="46.4" ry="18"></ellipse>
+<text text-anchor="middle" x="46.2" y="-193.28" font-family="Helvetica,Arial,sans-serif" font-size="10.00">CourseID (PK)</text>
+</g>
+<!-- CourseID (PK)&#45;&#45;Course -->
+<g id="edge1" class="edge">
+<title>CourseID (PK)--Course</title>
+<path fill="none" stroke="black" d="M66.17,-179.69C78.92,-169.1 95.46,-155.37 108.57,-144.48"></path>
+</g>
+<!-- Title -->
+<g id="node7" class="node">
+<title>Title</title>
+<ellipse fill="none" stroke="black" cx="37.87" cy="-83.28" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="37.87" y="-80.28" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Title</text>
+</g>
+<!-- Title&#45;&#45;Course -->
+<g id="edge2" class="edge">
+<title>Title--Course</title>
+<path fill="none" stroke="black" d="M60.29,-93.69C73.24,-99.71 89.63,-107.32 103.31,-113.68"></path>
+</g>
+<!-- Credits -->
+<g id="node8" class="node">
+<title>Credits</title>
+<ellipse fill="none" stroke="black" cx="129.6" cy="-18" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="129.6" y="-15" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Credits</text>
+</g>
+<!-- Credits&#45;&#45;Course -->
+<g id="edge3" class="edge">
+<title>Credits--Course</title>
+<path fill="none" stroke="black" d="M129.74,-36.37C129.9,-56.4 130.16,-88.26 130.32,-108.19"></path>
+</g>
+<!-- StudentID (PK) -->
+<g id="node9" class="node">
+<title>StudentID (PK)</title>
+<ellipse fill="none" stroke="black" cx="516.98" cy="-24.8" rx="47.57" ry="18"></ellipse>
+<text text-anchor="middle" x="516.98" y="-21.8" font-family="Helvetica,Arial,sans-serif" font-size="10.00">StudentID (PK)</text>
+</g>
+<!-- StudentID (PK)&#45;&#45;Student -->
+<g id="edge9" class="edge">
+<title>StudentID (PK)--Student</title>
+<path fill="none" stroke="black" d="M516.52,-43.18C516.01,-63.22 515.21,-95.09 514.71,-115.03"></path>
+</g>
+<!-- Name -->
+<g id="node10" class="node">
+<title>Name</title>
+<ellipse fill="none" stroke="black" cx="607.13" cy="-90.83" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="607.13" y="-87.83" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Name</text>
+</g>
+<!-- Name&#45;&#45;Student -->
+<g id="edge10" class="edge">
+<title>Name--Student</title>
+<path fill="none" stroke="black" d="M584.65,-101.07C571.66,-106.99 555.22,-114.47 541.5,-120.72"></path>
+</g>
+<!-- EnrollmentID (PK) -->
+<g id="node11" class="node">
+<title>EnrollmentID (PK)</title>
+<ellipse fill="none" stroke="black" cx="248.35" cy="-307.32" rx="56.43" ry="18"></ellipse>
+<text text-anchor="middle" x="248.35" y="-304.32" font-family="Helvetica,Arial,sans-serif" font-size="10.00">EnrollmentID (PK)</text>
+</g>
+<!-- EnrollmentID (PK)&#45;&#45;Enrollment -->
+<g id="edge5" class="edge">
+<title>EnrollmentID (PK)--Enrollment</title>
+<path fill="none" stroke="black" d="M265.88,-289.91C276.93,-278.94 291.18,-264.79 302.39,-253.66"></path>
+</g>
+<!-- Grade -->
+<g id="node12" class="node">
+<title>Grade</title>
+<ellipse fill="none" stroke="black" cx="316.83" cy="-349.44" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="316.83" y="-346.44" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Grade</text>
+</g>
+<!-- Grade&#45;&#45;Enrollment -->
+<g id="edge6" class="edge">
+<title>Grade--Enrollment</title>
+<path fill="none" stroke="black" d="M317.46,-331.37C318.19,-310.14 319.4,-275.12 320.14,-253.77"></path>
+</g>
+<!-- C&#45;E&#45;&#45;Course -->
+<g id="edge13" class="edge">
+<title>C-E--Course</title>
+<path fill="none" stroke="black" d="M213.33,-162.56C198.25,-155.95 175.57,-146.03 157.76,-138.23"></path>
+<text text-anchor="middle" x="179.29" y="-153.4" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1</text>
+</g>
+<!-- S&#45;E&#45;&#45;Student -->
+<g id="edge8" class="edge">
+<title>S-E--Student</title>
+<path fill="none" stroke="black" d="M431.52,-167.84C446.73,-161.46 469.35,-151.97 487.1,-144.52"></path>
+<text text-anchor="middle" x="449.31" y="-147.18" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1 &nbsp;&nbsp;</text>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A School Enrollment System Chen Diagram
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conceptual-design-in-crows-foot-notation" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-crows-foot-notation">Conceptual design in Crows foot notation</h3>
+<p>Entities are Courses, Students and Enrollments. Students has attributes: int courseID (the primary key), string title, and string credits. Courses has attributes: int courseID (the primary key), string name, and int enrollmentDate. Enrollments has attributes: int enrollmentID (the primary key), int enrollmentDate, int grade. Student is connected via a one to many takes relationship to Enrollment and Course is connected via a one to many has relationship to Enrollement.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram 
+    Courses {
+        int courseID PK
+        string title
+        string credits
+    }
+
+    Students {
+        int studentID PK
+        string name
+        int enrollmentDate
+    }
+
+    Enrollments {
+        int enrollmentID PK
+        int enrollmentDate
+        int grade
+    }
+
+    STUDENT ||--o{ ENROLLMENT : "takes" 
+    COURSE ||--o{ ENROLLMENT : "has"
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="design-assumptions-considerations-and-tradeoffs" class="level3">
+<h3 class="anchored" data-anchor-id="design-assumptions-considerations-and-tradeoffs">Design assumptions, considerations and tradeoffs</h3>
+<p>The first assumption I had was to make Students have a many to many relationship with Courses and then a one to one relationship with Enrollments. I then questioned how this would properly connect to Courses to track the information leading me to believe a ternary relationship would be best. I remembered it is best to avoid this and decided using Enrollments as the associative identity would be best.</p>
+</section>
+<section id="relation-sets" class="level3">
+<h3 class="anchored" data-anchor-id="relation-sets">Relation sets</h3>
+<p>The following are the initial relation sets for the system:</p>
+<ul>
+<li>Course( <ins>courseID</ins>, title, credits )</li>
+<li>Students( <ins>studentID</ins>, name, enrollmentDate )</li>
+<li>Enrollment( <ins>enrollmentID</ins>, enrollmentDate, Grade )</li>
+</ul>
+</section>
+</section>
+<section id="healthcare-appointment-management-system" class="level2">
+<h2 class="anchored" data-anchor-id="healthcare-appointment-management-system">Healthcare Appointment Management System</h2>
+<p>Consider a healthcare clinic that wants to manage patients, doctors, and appointments. Each patient has a patient ID, name, date of birth, and contact information. Doctors have a doctor ID, name, specialty, and contact number. Appointments have an appointment ID, date, time, and status. A patient can schedule multiple appointments, and each appointment is with a single doctor. A doctor can have multiple appointments, but each appointment is associated with only one patient.</p>
+<section id="conceptual-design-in-chen-notation-1" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-chen-notation-1">Conceptual design in Chen Notation</h3>
+<p>The diagram depicts a many to one relationship between Doctors and Appointments and many to one relationship between Patients and Appointments. Each Appointment must have exactly one Doctor and one Patient. Each of these entities has several attributes with doctorID being the primary key for Doctors, appointmentID being the primary key for Appointments, and patientID being the primary key for Patients.</p>
+<div class="cell" data-fig-width="100%" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-chen-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="NaN" height="480" viewbox="0.00 0.00 665.37 453.71" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 449.71)">
+<title>ER</title>
+<!-- Doctor -->
+<g id="node1" class="node">
+<title>Doctor</title>
+<polygon fill="none" stroke="black" points="171.31,-318.76 117.31,-318.76 117.31,-282.76 171.31,-282.76 171.31,-318.76"></polygon>
+<text text-anchor="middle" x="144.31" y="-297.76" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Doctor</text>
+</g>
+<!-- D&#45;A -->
+<g id="node16" class="node">
+<title>D-A</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="256.31,-311.79 227.37,-293.79 256.31,-275.79 285.26,-293.79 256.31,-311.79"></polygon>
+<text text-anchor="middle" x="256.31" y="-290.79" font-family="Helvetica,Arial,sans-serif" font-size="10.00">D-A</text>
+</g>
+<!-- Doctor&#45;&#45;D&#45;A -->
+<g id="edge11" class="edge">
+<title>Doctor--D-A</title>
+<path fill="none" stroke="black" d="M171.43,-299.07C189.16,-297.97 212.23,-296.54 229.84,-295.44"></path>
+<text text-anchor="middle" x="190.49" y="-300.26" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,m &nbsp;</text>
+</g>
+<!-- Appointment -->
+<g id="node2" class="node">
+<title>Appointment</title>
+<polygon fill="none" stroke="black" points="405.19,-330.31 336.64,-330.31 336.64,-294.31 405.19,-294.31 405.19,-330.31"></polygon>
+<text text-anchor="middle" x="370.91" y="-309.31" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Appointment</text>
+</g>
+<!-- Patient -->
+<g id="node3" class="node">
+<title>Patient</title>
+<polygon fill="none" stroke="black" points="522.04,-140.96 468.04,-140.96 468.04,-104.96 522.04,-104.96 522.04,-140.96"></polygon>
+<text text-anchor="middle" x="495.04" y="-119.96" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Patient</text>
+</g>
+<!-- P&#45;A -->
+<g id="node17" class="node">
+<title>P-A</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="423.95,-227.59 396.83,-209.59 423.95,-191.59 451.07,-209.59 423.95,-227.59"></polygon>
+<text text-anchor="middle" x="423.95" y="-206.59" font-family="Helvetica,Arial,sans-serif" font-size="10.00">P-A</text>
+</g>
+<!-- Patient&#45;&#45;P&#45;A -->
+<g id="edge5" class="edge">
+<title>Patient--P-A</title>
+<path fill="none" stroke="black" d="M479.96,-141.33C465.94,-158.42 445.47,-183.36 433.55,-197.88"></path>
+<text text-anchor="middle" x="445.37" y="-172.61" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,m &nbsp;&nbsp;</text>
+</g>
+<!-- Name0 -->
+<g id="node4" class="node">
+<title>Name0</title>
+<ellipse fill="none" stroke="black" cx="427.65" cy="-36.56" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="427.65" y="-33.56" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Name</text>
+</g>
+<!-- Name0&#45;&#45;Patient -->
+<g id="edge4" class="edge">
+<title>Name0--Patient</title>
+<path fill="none" stroke="black" d="M440.33,-52.82C451.84,-67.58 468.81,-89.33 480.79,-104.69"></path>
+</g>
+<!-- Name1 -->
+<g id="node5" class="node">
+<title>Name1</title>
+<ellipse fill="none" stroke="black" cx="117.01" cy="-409.13" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="117.01" y="-406.13" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Name</text>
+</g>
+<!-- Name1&#45;&#45;Doctor -->
+<g id="edge14" class="edge">
+<title>Name1--Doctor</title>
+<path fill="none" stroke="black" d="M121.52,-391.24C126.55,-371.28 134.64,-339.16 139.71,-319.05"></path>
+</g>
+<!-- PatientID (PK) -->
+<g id="node6" class="node">
+<title>PatientID (PK)</title>
+<ellipse fill="none" stroke="black" cx="511.38" cy="-18" rx="45.73" ry="18"></ellipse>
+<text text-anchor="middle" x="511.38" y="-15" font-family="Helvetica,Arial,sans-serif" font-size="10.00">PatientID (PK)</text>
+</g>
+<!-- PatientID (PK)&#45;&#45;Patient -->
+<g id="edge1" class="edge">
+<title>PatientID (PK)--Patient</title>
+<path fill="none" stroke="black" d="M508.53,-36.28C505.53,-55.55 500.84,-85.7 497.85,-104.89"></path>
+</g>
+<!-- DoB -->
+<g id="node7" class="node">
+<title>DoB</title>
+<ellipse fill="none" stroke="black" cx="589.75" cy="-76.71" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="589.75" y="-73.71" font-family="Helvetica,Arial,sans-serif" font-size="10.00">DoB</text>
+</g>
+<!-- DoB&#45;&#45;Patient -->
+<g id="edge2" class="edge">
+<title>DoB--Patient</title>
+<path fill="none" stroke="black" d="M567.78,-87.44C554.23,-94.06 536.74,-102.6 522.3,-109.65"></path>
+</g>
+<!-- Contact Information -->
+<g id="node8" class="node">
+<title>Contact Information</title>
+<ellipse fill="none" stroke="black" cx="598.82" cy="-164.31" rx="58.6" ry="18"></ellipse>
+<text text-anchor="middle" x="598.82" y="-161.31" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Contact Information</text>
+</g>
+<!-- Contact Information&#45;&#45;Patient -->
+<g id="edge3" class="edge">
+<title>Contact Information--Patient</title>
+<path fill="none" stroke="black" d="M562.81,-149.97C549.46,-144.65 534.56,-138.71 522.14,-133.76"></path>
+</g>
+<!-- DoctorID (PK) -->
+<g id="node9" class="node">
+<title>DoctorID (PK)</title>
+<ellipse fill="none" stroke="black" cx="51.48" cy="-350.91" rx="45.72" ry="18"></ellipse>
+<text text-anchor="middle" x="51.48" y="-347.91" font-family="Helvetica,Arial,sans-serif" font-size="10.00">DoctorID (PK)</text>
+</g>
+<!-- DoctorID (PK)&#45;&#45;Doctor -->
+<g id="edge13" class="edge">
+<title>DoctorID (PK)--Doctor</title>
+<path fill="none" stroke="black" d="M78.83,-336.14C90.92,-329.61 105.09,-321.95 117.16,-315.43"></path>
+</g>
+<!-- Specialty -->
+<g id="node10" class="node">
+<title>Specialty</title>
+<ellipse fill="none" stroke="black" cx="113.63" cy="-195.52" rx="32" ry="18"></ellipse>
+<text text-anchor="middle" x="113.63" y="-192.52" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Specialty</text>
+</g>
+<!-- Specialty&#45;&#45;Doctor -->
+<g id="edge15" class="edge">
+<title>Specialty--Doctor</title>
+<path fill="none" stroke="black" d="M118.83,-213.38C124.44,-232.61 133.32,-263.06 138.98,-282.47"></path>
+</g>
+<!-- Contact Number -->
+<g id="node11" class="node">
+<title>Contact Number</title>
+<ellipse fill="none" stroke="black" cx="49.53" cy="-253.05" rx="49.57" ry="18"></ellipse>
+<text text-anchor="middle" x="49.53" y="-250.05" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Contact Number</text>
+</g>
+<!-- Contact Number&#45;&#45;Doctor -->
+<g id="edge16" class="edge">
+<title>Contact Number--Doctor</title>
+<path fill="none" stroke="black" d="M78.74,-267.75C91.04,-273.94 105.25,-281.1 117.3,-287.16"></path>
+</g>
+<!-- AppointmentID (PK) -->
+<g id="node12" class="node">
+<title>AppointmentID (PK)</title>
+<ellipse fill="none" stroke="black" cx="325.09" cy="-394.56" rx="60.79" ry="18"></ellipse>
+<text text-anchor="middle" x="325.09" y="-391.56" font-family="Helvetica,Arial,sans-serif" font-size="10.00">AppointmentID (PK)</text>
+</g>
+<!-- AppointmentID (PK)&#45;&#45;Appointment -->
+<g id="edge7" class="edge">
+<title>AppointmentID (PK)--Appointment</title>
+<path fill="none" stroke="black" d="M335.03,-376.71C342.67,-363.01 353.16,-344.17 360.83,-330.41"></path>
+</g>
+<!-- Date -->
+<g id="node13" class="node">
+<title>Date</title>
+<ellipse fill="none" stroke="black" cx="465.12" cy="-325.94" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="465.12" y="-322.94" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Date</text>
+</g>
+<!-- Date&#45;&#45;Appointment -->
+<g id="edge8" class="edge">
+<title>Date--Appointment</title>
+<path fill="none" stroke="black" d="M438.63,-322.11C428.29,-320.61 416.3,-318.88 405.3,-317.29"></path>
+</g>
+<!-- Time -->
+<g id="node14" class="node">
+<title>Time</title>
+<ellipse fill="none" stroke="black" cx="452.29" cy="-395.69" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="452.29" y="-392.69" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Time</text>
+</g>
+<!-- Time&#45;&#45;Appointment -->
+<g id="edge9" class="edge">
+<title>Time--Appointment</title>
+<path fill="none" stroke="black" d="M437.36,-380.4C423.6,-366.29 403.15,-345.34 388.58,-330.41"></path>
+</g>
+<!-- Status -->
+<g id="node15" class="node">
+<title>Status</title>
+<ellipse fill="none" stroke="black" cx="387.84" cy="-427.71" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="387.84" y="-424.71" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Status</text>
+</g>
+<!-- Status&#45;&#45;Appointment -->
+<g id="edge10" class="edge">
+<title>Status--Appointment</title>
+<path fill="none" stroke="black" d="M385.2,-409.68C382.04,-388.12 376.77,-352.26 373.6,-330.6"></path>
+</g>
+<!-- D&#45;A&#45;&#45;Appointment -->
+<g id="edge12" class="edge">
+<title>D-A--Appointment</title>
+<path fill="none" stroke="black" d="M279.5,-297.54C295.85,-300.18 318.03,-303.77 336.45,-306.74"></path>
+<text text-anchor="middle" x="299.23" y="-305.14" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1 &nbsp;</text>
+</g>
+<!-- P&#45;A&#45;&#45;Appointment -->
+<g id="edge6" class="edge">
+<title>P-A--Appointment</title>
+<path fill="none" stroke="black" d="M417.01,-223.02C407.64,-241.18 390.88,-273.65 380.35,-294.02"></path>
+<text text-anchor="middle" x="388.68" y="-261.52" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1 &nbsp;&nbsp;</text>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: A Healthcare Appointment Management System Chen Diagram
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conceptual-design-in-crows-foot-notation-1" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-crows-foot-notation-1">Conceptual design in Crows foot notation</h3>
+<p>The entities are Patients, Doctors and Appointments. Patients has attributes: int patientID (the primary key), int dob, string name, and string contactInformation. Doctors has attributes: int doctorID (the primary key), string name, string specialty, int contactNumber. Appointments has attributes: int appointmentID (the primary key), int time, int date, and int status. Patient is connected via a one to many makes relationship with Appointment and Doctor is conncted via a one to many relationship with Appointment.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram 
+    Patients {
+        int patientID PK
+        int dob
+        string name
+        string contactInformation
+    }
+
+    Doctors {
+        int doctorID PK
+        string name
+        string specialty
+        int contactNumber
+    }
+
+    Appointments {
+        int appointmentID PK
+        int time
+        int date
+        int status
+    }
+
+    PATIENT ||--o{ APPOINTMENT : "makes" 
+    DOCTOR ||--o{ APPOINTMENT : "has"
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="design-assumptions-considerations-and-tradeoffs-1" class="level3">
+<h3 class="anchored" data-anchor-id="design-assumptions-considerations-and-tradeoffs-1">Design assumptions, considerations and tradeoffs</h3>
+<p>This was less difficult to process for me then the first one. I could see the relationships that needed to be made pretty easily. The main consideration was how to treat certain attributes. Is status an int or a string? What about dob and contactInformation? I decided that status would be best as an int to represent several different states. Dob would be easiest to deal with as an int so I chose that. Contact Information could be an email as well so I chose string.</p>
+</section>
+<section id="relation-sets-1" class="level3">
+<h3 class="anchored" data-anchor-id="relation-sets-1">Relation sets</h3>
+<p>The following are the initial relation sets for the system:</p>
+<ul>
+<li>Patient( <ins>patientID</ins>, dob, name, contactInformation )</li>
+<li>Appointment( <ins>appointmentID</ins>, status, time, date )</li>
+<li>Doctor( <ins>doctorID</ins>, name, contactNumber, specialty )</li>
+</ul>
+</section>
+</section>
+<section id="restaurant-reservation-system" class="level2">
+<h2 class="anchored" data-anchor-id="restaurant-reservation-system">Restaurant Reservation System</h2>
+<p>Envision a restaurant that wants to manage reservations, customers, and tables. Each reservation has a reservation ID, date, and time. Customers have a customer ID, name, and contact number. Tables have a table number, seating capacity, and location. A customer can make multiple reservations, and each reservation is for a single table. Each table can have multiple reservations over time, but each reservation is associated with only one customer</p>
+<section id="conceptual-design-in-chen-notation-2" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-chen-notation-2">Conceptual design in Chen Notation</h3>
+<p>The diagram depicts a many to one relationship between Table and Reservation and many to one relationship between Customer and Reservation. Each Reservation must have exactly one Table and one Customer. Each of these entities has several attributes with tableNumber being the primary key for Table, reserveationID being the primary key for Appointments, and customerID being the primary key for Customer.</p>
+<div class="cell" data-fig-width="100%" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-chen-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="NaN" height="480" viewbox="0.00 0.00 678.58 394.08" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 390.08)">
+<title>ER</title>
+<!-- Reservation -->
+<g id="node1" class="node">
+<title>Reservation</title>
+<polygon fill="none" stroke="black" points="390.38,-272.88 326.85,-272.88 326.85,-236.88 390.38,-236.88 390.38,-272.88"></polygon>
+<text text-anchor="middle" x="358.61" y="-251.88" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Reservation</text>
+</g>
+<!-- Customer -->
+<g id="node2" class="node">
+<title>Customer</title>
+<polygon fill="none" stroke="black" points="562.8,-143.57 508.03,-143.57 508.03,-107.57 562.8,-107.57 562.8,-143.57"></polygon>
+<text text-anchor="middle" x="535.41" y="-122.57" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Customer</text>
+</g>
+<!-- Makes -->
+<g id="node13" class="node">
+<title>Makes</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="442.81,-199.36 406.75,-181.36 442.81,-163.36 478.87,-181.36 442.81,-199.36"></polygon>
+<text text-anchor="middle" x="442.81" y="-178.36" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Makes</text>
+</g>
+<!-- Customer&#45;&#45;Makes -->
+<g id="edge4" class="edge">
+<title>Customer--Makes</title>
+<path fill="none" stroke="black" d="M507.88,-142.16C492.1,-151.67 472.81,-163.28 459.35,-171.39"></path>
+<text text-anchor="middle" x="473.48" y="-147.78" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,m &nbsp;</text>
+</g>
+<!-- Table -->
+<g id="node3" class="node">
+<title>Table</title>
+<polygon fill="none" stroke="black" points="181.98,-191.37 127.98,-191.37 127.98,-155.37 181.98,-155.37 181.98,-191.37"></polygon>
+<text text-anchor="middle" x="154.98" y="-170.37" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Table</text>
+</g>
+<!-- Has -->
+<g id="node14" class="node">
+<title>Has</title>
+<polygon fill="lightgrey" stroke="lightgrey" points="259.02,-221.36 232.02,-203.36 259.02,-185.36 286.02,-203.36 259.02,-221.36"></polygon>
+<text text-anchor="middle" x="259.02" y="-200.36" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Has</text>
+</g>
+<!-- Table&#45;&#45;Has -->
+<g id="edge9" class="edge">
+<title>Table--Has</title>
+<path fill="none" stroke="black" d="M182.04,-181.17C200.23,-186.41 223.74,-193.19 239.97,-197.87"></path>
+<text text-anchor="middle" x="202.12" y="-192.52" font-family="Helvetica,Arial,sans-serif" font-size="10.00">0,m </text>
+</g>
+<!-- ReservationID (PK) -->
+<g id="node4" class="node">
+<title>ReservationID (PK)</title>
+<ellipse fill="none" stroke="black" cx="371.75" cy="-368.08" rx="57.77" ry="18"></ellipse>
+<text text-anchor="middle" x="371.75" y="-365.08" font-family="Helvetica,Arial,sans-serif" font-size="10.00">ReservationID (PK)</text>
+</g>
+<!-- ReservationID (PK)&#45;&#45;Reservation -->
+<g id="edge6" class="edge">
+<title>ReservationID (PK)--Reservation</title>
+<path fill="none" stroke="black" d="M369.63,-349.89C367.18,-328.77 363.16,-294.13 360.72,-273.02"></path>
+</g>
+<!-- Time -->
+<g id="node5" class="node">
+<title>Time</title>
+<ellipse fill="none" stroke="black" cx="437.46" cy="-321.16" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="437.46" y="-318.16" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Time</text>
+</g>
+<!-- Time&#45;&#45;Reservation -->
+<g id="edge8" class="edge">
+<title>Time--Reservation</title>
+<path fill="none" stroke="black" d="M420.35,-306.78C408.57,-296.88 392.84,-283.65 380.2,-273.03"></path>
+</g>
+<!-- Date -->
+<g id="node6" class="node">
+<title>Date</title>
+<ellipse fill="none" stroke="black" cx="297.48" cy="-336.99" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="297.48" y="-333.99" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Date</text>
+</g>
+<!-- Date&#45;&#45;Reservation -->
+<g id="edge7" class="edge">
+<title>Date--Reservation</title>
+<path fill="none" stroke="black" d="M309.56,-320.77C319.79,-307.03 334.44,-287.34 345.07,-273.07"></path>
+</g>
+<!-- CustomerID (PK) -->
+<g id="node7" class="node">
+<title>CustomerID (PK)</title>
+<ellipse fill="none" stroke="black" cx="522.32" cy="-18" rx="52.59" ry="18"></ellipse>
+<text text-anchor="middle" x="522.32" y="-15" font-family="Helvetica,Arial,sans-serif" font-size="10.00">CustomerID (PK)</text>
+</g>
+<!-- CustomerID (PK)&#45;&#45;Customer -->
+<g id="edge1" class="edge">
+<title>CustomerID (PK)--Customer</title>
+<path fill="none" stroke="black" d="M524.54,-36.25C526.95,-56.03 530.77,-87.42 533.18,-107.24"></path>
+</g>
+<!-- Name -->
+<g id="node8" class="node">
+<title>Name</title>
+<ellipse fill="none" stroke="black" cx="627.71" cy="-184.16" rx="27" ry="18"></ellipse>
+<text text-anchor="middle" x="627.71" y="-181.16" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Name</text>
+</g>
+<!-- Name&#45;&#45;Customer -->
+<g id="edge2" class="edge">
+<title>Name--Customer</title>
+<path fill="none" stroke="black" d="M608.14,-171.73C595.01,-163.4 577.54,-152.31 563.01,-143.09"></path>
+</g>
+<!-- Table Number (PK) -->
+<g id="node9" class="node">
+<title>Table Number (PK)</title>
+<ellipse fill="none" stroke="black" cx="57.71" cy="-142.33" rx="57.93" ry="18"></ellipse>
+<text text-anchor="middle" x="57.71" y="-139.33" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Table Number (PK)</text>
+</g>
+<!-- Table Number (PK)&#45;&#45;Table -->
+<g id="edge13" class="edge">
+<title>Table Number (PK)--Table</title>
+<path fill="none" stroke="black" d="M98.12,-155.22C108.14,-158.42 118.64,-161.77 127.85,-164.71"></path>
+</g>
+<!-- Seating Capacity -->
+<g id="node10" class="node">
+<title>Seating Capacity</title>
+<ellipse fill="none" stroke="black" cx="139.87" cy="-66.11" rx="50.57" ry="18"></ellipse>
+<text text-anchor="middle" x="139.87" y="-63.11" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Seating Capacity</text>
+</g>
+<!-- Seating Capacity&#45;&#45;Table -->
+<g id="edge12" class="edge">
+<title>Seating Capacity--Table</title>
+<path fill="none" stroke="black" d="M142.44,-84.31C145.21,-104.03 149.62,-135.33 152.4,-155.08"></path>
+</g>
+<!-- Contact Number -->
+<g id="node11" class="node">
+<title>Contact Number</title>
+<ellipse fill="none" stroke="black" cx="621.04" cy="-70.01" rx="49.57" ry="18"></ellipse>
+<text text-anchor="middle" x="621.04" y="-67.01" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Contact Number</text>
+</g>
+<!-- Contact Number&#45;&#45;Customer -->
+<g id="edge3" class="edge">
+<title>Contact Number--Customer</title>
+<path fill="none" stroke="black" d="M596.73,-85.78C586.25,-92.59 573.94,-100.58 563.1,-107.61"></path>
+</g>
+<!-- Location -->
+<g id="node12" class="node">
+<title>Location</title>
+<ellipse fill="none" stroke="black" cx="80.69" cy="-253.75" rx="30.99" ry="18"></ellipse>
+<text text-anchor="middle" x="80.69" y="-250.75" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Location</text>
+</g>
+<!-- Location&#45;&#45;Table -->
+<g id="edge11" class="edge">
+<title>Location--Table</title>
+<path fill="none" stroke="black" d="M95.37,-237.87C107.72,-224.51 125.37,-205.41 138.26,-191.46"></path>
+</g>
+<!-- Makes&#45;&#45;Reservation -->
+<g id="edge5" class="edge">
+<title>Makes--Reservation</title>
+<path fill="none" stroke="black" d="M429.65,-192.85C416.24,-204.56 395.23,-222.91 379.53,-236.61"></path>
+<text text-anchor="middle" x="392.09" y="-217.73" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1 &nbsp;&nbsp;&nbsp;&nbsp;</text>
+</g>
+<!-- Has&#45;&#45;Reservation -->
+<g id="edge10" class="edge">
+<title>Has--Reservation</title>
+<path fill="none" stroke="black" d="M274.58,-211.41C288.48,-218.6 309.27,-229.35 326.69,-238.37"></path>
+<text text-anchor="middle" x="293.14" y="-227.89" font-family="Helvetica,Arial,sans-serif" font-size="10.00">1,1 </text>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chen-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: A Restaurant Reservation System Chen Diagram
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conceptual-design-in-crows-foot-notation-2" class="level3">
+<h3 class="anchored" data-anchor-id="conceptual-design-in-crows-foot-notation-2">Conceptual design in Crows foot notation</h3>
+<p>The entities are Tables, Reservations and Customers. Tables has attributes: int tableNumber (the primary key), int seatingCapacity, and string location. Reservations has attributes: int reservationID (the primary key), int time, and int date. Customers has attributes: int customerID (the primary key), string name, and int contactNumber. Customer is connected via a one to many makes relationship with Reservation and Table is conncted via a one to many relationship with Reservation.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">erDiagram 
+    Customers {
+        int customerID pk
+        string name
+        int contactNumber
+    }
+
+    Tables {
+        int tableNumber pk
+        int seatingCapacity
+        string location
+    }
+
+    Reservations {
+        int reservationID pk
+        int time
+        int date
+    }
+
+    CUSTOMER ||--o{ RESERVATION : "makes" 
+    TABLE ||--o{ RESERVATION : "has"
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="design-assumptions-considerations-and-tradeoffs-2" class="level3">
+<h3 class="anchored" data-anchor-id="design-assumptions-considerations-and-tradeoffs-2">Design assumptions, considerations and tradeoffs</h3>
+<p>Similar to the last one the relationships were pretty easy to figure out. This time the consideration was as to what was the primary key for table. Should it be location or tableNumber? I ended up deciding the best choice was tableNumber due to location possibly being similar.</p>
+</section>
+<section id="relation-sets-2" class="level3">
+<h3 class="anchored" data-anchor-id="relation-sets-2">Relation sets</h3>
+<p>The following are the initial relation sets for the system:</p>
+<ul>
+<li>table( <ins>tableNumber</ins>, location, seatingCapacity )</li>
+<li>reservation( <ins>reservationID</ins>, date, time )</li>
+<li>customer( <ins>customerID</ins>, contactNumber, name )</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="reflection" class="level1">
+<h1>Reflection</h1>
+<p>(fill in the <em>answer here</em> blocks below. Keep the existing formatting to see what a definition format looks like.)</p>
+<dl>
+<dt>What do you find most difficult about the assignment?</dt>
+<dd>
+Figuring out how to create the chen diagrams and the school system took a bit of time to create properly.
+</dd>
+<dt>What do you find easiest about the assignment?</dt>
+<dd>
+I actually believe I have made mermaid diagrams before. This was incredibly easy and by far the easiest part.
+</dd>
+<dt>What did you learn that will name the next assignment easier?</dt>
+<dd>
+I learned how dot diagrams are made and how to better analyze situations in order to create effective and accurate ER Diagrams.
+</dd>
+</dl>
+</section>
+<section id="readme.md" class="level1">
+<h1>README.md</h1>
+<p>A quality README is an important part of EVERY project. Using the Quarto <em>include</em> command we’re including a copy of your README in the project report so that a human can evaluate it.</p>
+<p>Make sure that you edit the README so that it’s explanatory! Note that you don’t need a readme within the <em>reports</em> folder for this assignment. We’re only focused on the root <em>README.md</em>.</p>
+<p><a href="https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/">Here is some info</a> on how to write a good README!</p>
+</section>
+<section id="welcome-to-homework-2---cmsc408---fall-2025" class="level1" style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px">
+<h1>Welcome to Homework 2 - CMSC408 - Fall 2025</h1>
+<section id="sources" class="level2">
+<h2 class="anchored" data-anchor-id="sources">Sources</h2>
+<p><a href="https://github.com/zalando/zalando-howto-open-source/blob/master/READMEtemplate.md#readme">GitHub</a> For README template</p>
+<p><a href="https://chat.openai.com/">ChatGPT</a> For further explanations of Chen and Crows Foot diagrams and their syntax.</p>
+<p><a href="https://quarto.org/docs/authoring/markdown-basics.html">Quarto</a> For Quarto markdown syntax and usage.</p>
+</section>
+<section id="instructions" class="level2">
+<h2 class="anchored" data-anchor-id="instructions">Instructions</h2>
+<p>You must edit <code>report.qmd</code> in the <code>./reports</code> folder to make it your own. You must remove, at minimum, and replace any sections that are specific to Homework 2. Additionally, you must choose three problems from the homework assignment and provide provide Chen and Crow’s Foot diagrams for each of the three problems with descriptions of the diagrams.</p>
+<p>Following that you must discuss design assumptions and difficulties you encountered for each of the three problems, add relation sets (including a primary key for each relation set), and lastly, you must edit the README.md file to make it your own.</p>
+<p>Once you finish editing the <code>report.qmd</code> file, you must render it to produce a <code>report.html</code> file. You may do this by running the <strong><em>quarto render</em></strong> command to render all files in the <code>./reports</code> folder, or by using the <strong><em>quarto render (filename)</em></strong> command, replacing filename with your filename and removing the brackets, to render individual files. Remember to make sure that you are in the <code>./reports</code> folder when you run the command. If you are not in the <code>./reports</code> folder, you will need to change directories to get there using the <strong><em>cd</em></strong> command followed by the path <code>./reports</code>.</p>
+<p>In order to to transform the <code>report.qmd</code> file into a <code>report.html</code> file, you will need to use one of the <strong><em>quarto render</em></strong> commands.</p>
+</section>
+<section id="files-and-folders" class="level2">
+<h2 class="anchored" data-anchor-id="files-and-folders">Files and Folders</h2>
+<p><code>./reports</code> - contains the scaffold QMD file Homework 2. Your job is to modify this document and render it to <em>html</em>. The <em>html</em> file will be created in the same <code>./reports</code> folder.</p>
+<p>To learn more about writing good README.md files, see:</p>
+<p><a href="https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/" class="uri">https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/</a></p>
+<p>This is a scaffold project. I’ll be providing scaffolds throughout the semester to get you working faster, and to make grading much easier for the TA team.</p>
+<p>This repository supports Homework 2. Here are the homework specs and tasks:</p>
+<p>https://virginiacommonwealth.instructure.com/courses/122236/assignments/1241134</p>
+<p>Good luck!</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

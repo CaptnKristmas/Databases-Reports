@@ -1,0 +1,122 @@
+---
+title: Homework 1 - Open Source Tools
+author:
+    - name: Vladimir Paraschiv
+      email: ParaschivV@vcu.edu
+date: 8/30/2025
+
+## Useful references:
+# - Basic Markdown: https://quarto.org/docs/authoring/markdown-basics.html
+# - Quarto figures: https://quarto.org/docs/authoring/figures.html
+# - HTML document basics: https://quarto.org/docs/output-formats/html-basics.html
+# - Quarto guide: https://quarto.org/docs/guide/
+# - VS Code and Quarto: https://quarto.org/docs/tools/vscode.html
+#   (RTFM and GET THE EXTENSION!!!!)
+---
+
+[Link to project repository](https://github.com/cmsc-vcu/cmsc408-fa2025-hw1-template)
+
+This article covers the differences between open source data engineering tools. It is split into its seperate categories discussing the distinct abilities of the platform categories.
+
+# Open Source Data Engineering Tools
+
+Author Alireza Sadeghi offers a nice overview of the [2025 data engineering landscape](https://www.pracdata.io/p/open-source-data-engineering-landscape-2025) in the on-line web site [Practical Data Engineering Substack](https://practicaldataengineering.substack.com/).
+
+![](assets/tools-2025.webp)
+
+# Major Categories
+
+Mr. Sadeghi proposes nine major tools categories.
+
+## Storage Systems
+
+Storage systems are foundational components in data engineering that handle
+the storage and retrieval of data. These systems can include traditional
+databases, distributed storage solutions, and modern cloud-based storage 
+options. They provide scalable, reliable, and secure environments to store 
+structured, semi-structured, and unstructured data, ensuring data is
+accessible for processing, analysis, and other operations.
+
+## Data Lake Platform
+
+Data Lake platforms are designed to store vast amounts of raw data in its native format until it is needed. Unlike traditional databases, data lakes can store structured, semi-structured, and unstructured data, providing a flexible and scalable storage solution. These platforms support the integration of multiple data sources, making it easier to perform big data analytics and machine learning on large datasets.
+
+## Data Integration
+
+Data Integration platforms are created with a focus on connecting, moving, and synchronizing data across systems. Unlike Data Processing and Computation, the focus is on getting the data, reliably and efficiently, to where it needs to be. Split into data ingestion frameworks, change data capture, and event hubs. Each respectively focuses on extracting data from separate sources and loading it into lakes or other systems, track and replicate changes from real time databases to analytical or streaming services, and to distribute/stream data at scale.
+
+## Data Processing and Computation
+
+Data Processing and Computation platforms are a response to organizations realizing that they have overestimated their needs for storing large amounts of data. As a result, single node solutions have become popular. Stream processing allows for real time analytics and applications by combining stream processing with tools for modifying data streams to meet business needs. Lastly there are python processing frameworks allowing for ease of use and providing many community resources.
+
+## Workflow and DataOps
+
+Workflow and DataOps platforms can be separated into workflow orchestration, data quality, data versioning and data transformation. The purpose of the first to automate, schedule, and monitor data across systems. Data quality's purpose is to validate, test, and ensure that data is correct and reliable before it is consumed. Data versioning applies version control to datasets to secure systems in the eventuality of an error and allow for rollbacks. Lastly, data transformation’s purpose is to transform raw data into usable analytic ready models.
+
+## Data Infrastructure and Monitoring
+
+Data Infrastructure and Monitoring focus on ensuring modern data engineerng runs reliably at scale. It includes resource management and observability. This can be split into resource scheduling and virtualization; and observability and monitoring. The first manages resources to provide scalability to cloud and hybrid enviroments. The later enhances the monitoring, logging, and diagnosing abilities.
+
+## ML/AI Platform
+
+ML/AI platforms focus on the infrastructure and tools that enhance support for machine learning and artificial intelligence workloads. This is an emerging sector with several projects. Split into vector databases and LLMops, the first enhances the ability to search through a vector database for retrieval like semantic search. The later focuses on the deployment, scaling, optimization and monitoring of LLMs.
+
+## Metadata Management
+
+Metadata Management platforms focus on tracking, organizing, and governing information about data. Essentially focusing on the data of the data. This enables the tracking of data, seeing how it is connected, and the indexing of said data. Metadata platforms collect and maintain metadata across systems, enabling discovery and making it easier for analysts or engineers to find and trust the data they need. A newer approach, created due to data lakes lacking catalog management capabilities. In turn they provide a central "catalog" of datasets in a data lake. This allows a company to ensure interoperability between multiple engines and platforms. An issue discovered in the past.
+
+## Analytics and Visualization
+
+Analytics and Visualization focus on analyzing, exploring and visualizing data to generate insights. Analytics and Visualization are different to Data Processing or Integration due to Analytics and Visualization’s focus on enabling humans to interpret, understand, and act on data. Split into BI-as-code solutions, compostable BI stack, and MPP query engines. The first focuses on integrating software engineering processes with BI workflows. The latter focuses on being flexible and modular, working directly with lakes or external engines. Lastly, MPP Query Engines crunch massive datasets to quickly to enable analytics.
+
+# Digging into the details
+
+In the following sections I identify three subcategories of data engineering tools of greatest interest to me.
+
+## Vector Databases
+
+This category is of particular interest to me due to its potential for great use for everyday consumers. Consumers do not directly interact with the database, but it allows for features such as semantic search, as discussed earlier, and more relevant search results in general. Google search itself may not be a vector database, but it utilizes many of the same concepts to provide relevant search information.
+
+Adding on to semantic search and recommendation systems, an unfortunate, or potentially fortunate for businesses, use is targeted advertising. Similar to how vector databases can create connections between words and concepts to recommend content or syntactically search, said databases can also create connections between interests and advertisements. Thus, allowing  for targeted advertisements, as we have seen in recent years, as opposed to general advertising as we have in the past.
+
+Lastly, an additional interesting utility of vector databases is their ability to assist in anomaly and fraud detection. Due to its ability to identify deviating data points, compared to the data as a whole, one can discern potential intrusions or other anomalous behavior.
+
+### Difference to Relatinal OLTP Databases
+
+Differing from relational OLTP databases due to their structure, vectors vs tables, primary use case, search and retrieval vs high volume and real time transactional workloads.
+
+## MPP (Massively Parallel Processing) Query Engines
+
+Another interesting category due to its potential for making predictions and other important business decisions. Distinguishable from data lakes, MPP query engines contain processed data, while the former contains raw data. One could view data lakes as an unsorted pile of documents and MPP query engines as the pile of documents after organizing into usable information. At times, they may work in conjunction, this allows the information stored in data lakes to be processed prior to digesting. 
+
+Working by combining nodes in a cluster where the system splits a large query into smaller component pieces and executes said query across multiple nodes. Each individual node processes its own portion of the data and then rejoins it all at the end. Specifically useful for large workloads that are incapable of being handled on a single machine.
+
+### Difference to Relatinal OLTP Databases
+
+The primary distinction to relational OLTP databases is that MPP query engines are designed for complex, large analytical processing while relational OLTP databases are optimized for large real time transactions.
+
+## Event Hubs (Streaming Pub/Sub Services)
+
+Due to their use in the IoT or internet of things this category interests me. Used in such a situation for collecting and processing the steams from data connected devices in real-time. As such these tools are key for logging and processing large amounts of data while providing real time analytics. This allows consumers to have accurate and up to date information on their devices.
+
+In turn, this also allows businesses to have immediate insights. Due to event hubs ability to process and ingest large amounts of data in real time, companies can improve their business intelligence. These can in turn be integrated with other services such cloud functions or analytics dashboards to provide scalable and useful ways to handle the massive data stream.
+
+### Difference to Relatinal OLTP Databases
+
+Largely differing in the use case, relational OLTP databases store the current state of the data while event hubs stream a continuousseries of "events" or an append only, ordered log of instances. Similar due to their handling of large data but differing in their use of said data and how it is handled.
+
+# Reflection
+
+I enjoyed the creativity of this project and could see myself using quarto for many different purposes. I found the initial understanding of how all this works was the most difficult but everything worked smoothly after. I didn't find anything very surprising and don't believe I would approach the project differently next time, if anything I found it surprisingly easy and fun.
+
+# README
+
+A quality README is an important part of EVERY project. Using the Quarto *include* command we're including a copy of your README in the project report so that a human can evaluate it.
+
+Make sure that you edit the README so that it's explanatory!  Note that you don't need a readme within the *reports* folder for this assignment. We're only focused on the root ``README.md``.
+
+[Here is some info](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/) on how to write a good README!
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::

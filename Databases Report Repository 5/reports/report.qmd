@@ -1,0 +1,586 @@
+---
+title: Homework 5 - Documenting an HR database
+# NOTE - the _quarto.yml file contains your name, email and other goodies.
+
+format:
+    html:
+        self-contained: true
+        embed-resources: true
+        standalone: true
+---
+
+As a highly prized and chased database wizard, you've been hired at an exorbitant hourly rate asked to document an HR database of a fortune 1_000_000 company.
+
+You've been given credentials to the database.  (See course slides and/or lecture video!)
+
+Your tasks are to submit a report that contains:
+
+1. A general written description of contents of database,
+1. A Chen diagram highlighting the major entities and relations,
+1. A Crows-foot diagram highlighting the entities, attributes, and the cardinality and participation of the relations,
+1. A python-generated listing of SQL tables and fields, and
+1. A listing of sample data showing the first bunch (5 or 10 or so) of EACH table.
+1. All this will be documented in the report and the HTML report will be uploaded to canvas.
+
+
+**Github repo:** <https://github.com/cmsc-vcu/cmsc408-fa2025-hw5-CaptnKristmas>
+
+
+# Database design
+
+The following sections document the general design of the HR database.
+
+## General description
+
+This database houses the HR information for a company. It stores and organizes informaiton about: employees, jobs, departments, locations, and previous employment. Some of the things it tracks includes: salaries of emplyees, their previous work history, who works in what department, their positions and the locations of departments.
+
+The HR database contains a total of 9 tables 1 of which being a View and the other 8 Base Tables. These include: **countries**, **departments**, **emp_details_view**, **employees**, **job_grades**, **job_history**, **jobs**, **locations** and **regions**. Each holds parts of the information and are connected via relationships showing how that information is connected in different ways. Through the following Chen and Crow's Foot diagrams one will be able to see how these relationships work.
+
+## Chen diagram
+
+The following diagram shows the relationships between tables in the database using a chen diagram.
+
+```{dot}
+//| echo: false
+//| label: fig-chen-hr
+//| fig-cap: "HR Database — Chen ER Diagram (Complete with Job Grades)"
+//| fig-width: 100%
+graph ER {
+fontname="Arial"
+bgcolor=transparent;
+splines=true;
+overlap=false;
+rankdir=LR;
+
+
+// === ENTITY NODES ===
+node [shape=box, style=filled, fillcolor=lightblue, fontsize=10];
+REGIONS;
+COUNTRIES;
+LOCATIONS;
+DEPARTMENTS;
+EMPLOYEES;
+JOBS;
+JOB_HISTORY;
+JOB_GRADES;
+
+// === ATTRIBUTE NODES ===
+node [shape=ellipse, style=filled, fillcolor=lightgreen, fontsize=9];
+
+// Multple nodes
+{node [label="job_id (PK)"] job_id0};
+{node [label="job_id (FK)"] job_id1, job_id2};
+{node [label="country_id (PK)"] country_id0};
+{node [label="country_id (FK)"] country_id1};
+{node [label="manager_id (FK)"] manager_id0, manager_id1};
+{node [label="department_id (PK)"] manager_id0};
+{node [label="department_id (FK)"] department_id1, department_id2};
+{node [label="location_id (PK)"] location_id0};
+{node [label="location_id (FK)"] location_id1};
+{node [label="employee_id (PK)"] employee_id0, employee_id1};
+
+// REGIONS
+region_id [label="region_id (PK)"];
+region_name [label="region_name"];
+
+// COUNTRIES
+country_id0 [label="country_id (PK)"];
+country_name [label="country_name"];
+region_fk [label="region_id (FK)"];
+
+// LOCATIONS
+location_id0 [label="location_id (PK)"];
+street_address [label="street_address"];
+postal_code [label="postal_code"];
+city [label="city"];
+state_province [label="state_province"];
+country_id1 [label="country_id (FK)"];
+
+// DEPARTMENTS
+department_id0 [label="department_id (PK)"];
+department_name [label="department_name"];
+manager_id0 [label="manager_id (FK)"];
+location_id1 [label="location_id (FK)"];
+
+// EMPLOYEES
+employee_id0 [label="employee_id (PK)"];
+first_name [label="first_name"];
+last_name [label="last_name"];
+email [label="email (UNI)"];
+phone_number [label="phone_number"];
+hire_date [label="hire_date"];
+job_id2 [label="job_id (FK)"];
+salary [label="salary"];
+commission_pct [label="commission_pct"];
+manager_id1 [label="manager_id (FK)"];
+department_id1 [label="department_id (FK)"];
+
+// JOBS
+job_id0 [label="job_id (PK)"];
+job_title [label="job_title"];
+min_salary [label="min_salary"];
+max_salary [label="max_salary"];
+
+// JOB_HISTORY
+employee_id1 [label="employee_id (PK)"];
+start_date [label="start_date (PK)"];
+end_date [label="end_date (PK)"];
+job_id1 [label="job_id (FK)"];
+department_id2 [label="department_id (FK)"];
+
+// JOB_GRADES
+grade_level [label="grade_level (PK)"];
+lowest_sal [label="lowest_sal"];
+highest_sal [label="highest_sal"];
+
+// === RELATIONSHIP DIAMONDS ===
+node [shape=diamond, style=filled, fillcolor=yellow, fontsize=10];
+HAS_REGION;
+LOCATED_IN_COUNTRY;
+LOCATED_AT;
+EMPLOYS;
+HAS_JOB;
+REPORTS_TO;
+RECORDED_IN;
+BELONGS_TO_GRADE [style="filled,dashed", fillcolor="#fff7cc"];
+
+// === ENTITY-ATTRIBUTE CONNECTIONS ===
+REGIONS -- region_id;
+REGIONS -- region_name;
+
+COUNTRIES -- country_id0;
+COUNTRIES -- country_name;
+COUNTRIES -- region_fk;
+
+LOCATIONS -- location_id0;
+LOCATIONS -- street_address;
+LOCATIONS -- postal_code;
+LOCATIONS -- city;
+LOCATIONS -- state_province;
+LOCATIONS -- country_id1;
+
+DEPARTMENTS -- department_id0;
+DEPARTMENTS -- department_name;
+DEPARTMENTS -- manager_id0;
+DEPARTMENTS -- location_id1;
+
+EMPLOYEES -- employee_id0;
+EMPLOYEES -- first_name;
+EMPLOYEES -- last_name;
+EMPLOYEES -- email;
+EMPLOYEES -- phone_number;
+EMPLOYEES -- hire_date;
+EMPLOYEES -- job_id2;
+EMPLOYEES -- salary;
+EMPLOYEES -- commission_pct;
+EMPLOYEES -- manager_id1;
+EMPLOYEES -- department_id1;
+
+JOBS -- job_id0;
+JOBS -- job_title;
+JOBS -- min_salary;
+JOBS -- max_salary;
+
+JOB_HISTORY -- employee_id1;
+JOB_HISTORY -- start_date;
+JOB_HISTORY -- end_date;
+JOB_HISTORY -- job_id1;
+JOB_HISTORY -- department_id2;
+
+JOB_GRADES -- grade_level;
+JOB_GRADES -- lowest_sal;
+JOB_GRADES -- highest_sal;
+
+// === RELATIONSHIP CONNECTIONS (with multiplicities) ===
+REGIONS -- HAS_REGION;
+HAS_REGION -- COUNTRIES [label="1,N", fontsize=9];
+
+COUNTRIES -- LOCATED_IN_COUNTRY;
+LOCATED_IN_COUNTRY -- LOCATIONS [label="1,N", fontsize=9];
+
+LOCATIONS -- LOCATED_AT;
+LOCATED_AT -- DEPARTMENTS [label="1,N", fontsize=9];
+
+DEPARTMENTS -- EMPLOYS;
+EMPLOYS -- EMPLOYEES [label="1,N", fontsize=9];
+
+JOBS -- HAS_JOB;
+HAS_JOB -- EMPLOYEES [label="1,N", fontsize=9];
+
+EMPLOYEES -- REPORTS_TO;
+REPORTS_TO -- EMPLOYEES [label="1,N", fontsize=9];
+
+EMPLOYEES -- RECORDED_IN;
+RECORDED_IN -- JOB_HISTORY [label="1,N", fontsize=9];
+
+JOBS -- RECORDED_IN;
+RECORDED_IN -- JOB_HISTORY [label="1,N", fontsize=9];
+
+DEPARTMENTS -- RECORDED_IN;
+RECORDED_IN -- JOB_HISTORY [label="0,N", fontsize=9];
+
+// Derived relationship (dashed)
+EMPLOYEES -- BELONGS_TO_GRADE [style=dashed, color=gray, label="by salary range", fontsize=9];
+BELONGS_TO_GRADE -- JOB_GRADES [style=dashed, color=gray, label="derived", fontsize=9];
+
+
+graph [pad="0.5"];
+}
+```
+
+
+
+## Crows foot diagram
+
+The following diagram shows the relationships between tables as a crows foot diagram.
+
+```{mermaid}
+%%| echo: false
+  erDiagram
+  REGIONS {
+    int region_id PK
+    varchar(25) region_name
+  }
+
+  COUNTRIES {
+    char(2) country_id PK
+    varchar(40) country_name
+    int region_id FK
+  }
+
+  LOCATIONS {
+    int location_id PK
+    varchar(40) street_address
+    varchar(12) postal_code
+    varchar(30) city
+    varchar(25) state_province
+    char(2) country_id FK
+  }
+
+  DEPARTMENTS {
+    int department_id PK
+    varchar(30) department_name
+    int manager_id FK
+    int location_id FK
+  }
+
+  JOBS {
+    varchar(10) job_id PK
+    varchar(35) job_title
+    float min_salary
+    float max_salary
+  }
+
+  EMPLOYEES {
+    int employee_id PK
+    varchar(20) first_name
+    varchar(25) last_name
+    varchar(25) email UK
+    varchar(20) phone_number
+    date hire_date
+    varchar(10) job_id FK
+    decimal salary
+    decimal commission_pct
+    int manager_id FK
+    int department_id FK
+  }
+
+  JOB_HISTORY {
+    int employee_id PK
+    date start_date PK
+    date end_date PK
+    varchar(10) job_id FK
+    int department_id FK
+  }
+
+  JOB_GRADES {
+  varchar(3) grade_level PK
+  float lowest_sal
+  float highest_sal
+  }
+
+  REGIONS ||--o{ COUNTRIES : "has"
+  COUNTRIES ||--o{ LOCATIONS : "has"
+  LOCATIONS ||--o{ DEPARTMENTS : "hosts"
+  DEPARTMENTS ||--o{ EMPLOYEES : "employs"
+  JOBS ||--o{ EMPLOYEES : "assigned"
+  EMPLOYEES ||--o{ JOB_HISTORY : "has"
+  JOBS ||--o{ JOB_HISTORY : "for_job"
+  DEPARTMENTS o|--o{ JOB_HISTORY : "worked_in"
+  EMPLOYEES ||--o{ EMPLOYEES : "manages"
+  JOB_GRADES ||--o{ EMPLOYEES : "grade"
+```
+
+## Listing of tables in the database
+
+The python blocks that follow show how to login and pull from a database in order to create an html that displays information from said database. The python code blocks are what is needed to be used in order to achieve such a task.
+
+### Create connection
+
+This code is loading credentials from the environment file (.env) in order to log into the database to pull further information.
+
+```{python}
+from itables import show
+from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper
+
+# Load these variables from .env file.
+config_map = {
+  'user'    : "MYSQL_USERNAME",
+  'password': "MYSQL_PASSWORD",
+  'host'    : "MYSQL_HOST",
+  'database': "HW5_DB"
+}
+
+cnx,config = create_db_wrapper( config_map )
+
+```
+
+### List of tables found in HR database
+
+This querries the Information_schema in MySQL in order to return a list of the tables in the database.
+
+```{python}
+df = run_sql_and_return_df(cnx,f"""
+SELECT 
+  TABLE_NAME, TABLE_TYPE
+FROM
+  INFORMATION_SCHEMA.TABLES 
+WHERE
+  TABLE_SCHEMA = '{config['database']}'
+ORDER BY
+  TABLE_NAME
+""",cnx)
+show(df)
+
+cnx,config = create_db_wrapper( config_map ) 
+```
+
+
+# Listing of Tables and sample data
+
+The following shows what data is stored on the database along with explanations of the various tables. It should help one understand how the data relates to each other.
+
+## Table: countries
+
+The *countries* table contains data such as the type, the type of key and the field. It contains data relating to countries and regions.
+
+### Schema: countries
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE countries
+""")
+show(df)
+```
+
+### Sample data: countries
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM countries LIMIT 10""")
+show(df)
+```
+
+## Table: departments
+
+The *departments* table contains data such as the field, type, and type of key. It contains data relating to departments their locations and managers.
+
+### Schema: departments
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE departments
+""")
+show(df)
+```
+
+### Sample data: departments
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM departments LIMIT 10""")
+show(df)
+```
+
+## Table: emp_details_view
+
+The *employee details view* table contains data such as the field and type. It contains data relating to employees, their departments, locations, managers and jobs.
+
+### Schema: emp_details_view
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE emp_details_view
+""")
+show(df)
+```
+
+### Sample data: emp_details_view
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM emp_details_view LIMIT 10""")
+show(df)
+```
+
+## Table: employees
+
+The *employees* table contains data such as the field, type and key. It contains data relating to employees, their departments, locations, managers and jobs. This expands on the previous table by adding information such as employees emails and phone numbers along with their names, hire dates, salaries and commision percentage.
+
+### Schema: employees
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE employees
+""")
+show(df)
+```
+
+### Sample data: employees
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM employees LIMIT 10""")
+show(df)
+```
+
+## Table: job_grades
+
+The *job_grades* table contains data such as the field, type and the key. This data relates to the highest and lowest salaries for a jobs grade.
+
+### Schema: job_grades
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE job_grades
+""")
+show(df)
+```
+
+### Sample data: job_grades
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM job_grades LIMIT 10""")
+show(df)
+```
+
+## Table: job_history
+
+The *job_history* table contains data such as the field, type and the key. This data relates employees to their start and end dates at the company.
+
+### Schema: job_history
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE job_history
+""")
+show(df)
+```
+
+### Sample data: job_history
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM job_history LIMIT 10""")
+show(df)
+```
+
+## Table: jobs
+
+The *jobs* table contains data such as field type and key. This data relates jobs to their max and minimum salaries.
+
+### Schema: jobs
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE jobs
+""")
+show(df)
+```
+
+### Sample data: jobs
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM jobs LIMIT 10""")
+show(df)
+```
+
+## Table: locations
+
+The *locations* table contains data such as the field, type and key. This data relates the street addresses on file to their respective cities, postal codes, states/provinces and countries.
+
+### Schema: locations
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE locations
+""")
+show(df)
+```
+
+### Sample data: locations
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM locations LIMIT 10""")
+show(df)
+```
+
+## Table: regions
+
+The *regions* table contains data such as field, type and key. This data relates to a list of regions.
+
+### Schema: regions
+
+```{python}
+# Table schema
+df = run_sql_and_return_df(cnx,"""
+DESCRIBE regions
+""")
+show(df)
+```
+
+### Sample data: regions
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+SELECT * FROM regions LIMIT 10""")
+show(df)
+```
+
+# Reflection
+
+Please add a paragraph or two about how this project went.
+: I discuss this further in the section asking about how the information provided was. I encountered major difficulties during set-up that took multiple full days to resolve. Unfortunately, this was by far the hardest set-up I have ever encountered. I once had issues setting up Windows Side Loader but that still was miles smoother than this experience.
+
+I did not encounter any massive issues while working on the project itself once everything was downloaded beyond some syntax errors that took a while to correct. I also encountered a weird issue where I had to uninstall itables, the pip cache and jupyter. Once reinstalling the issue was resolved.
+
+Was it harder or easier than you expected?
+: This ended up being easier then expected once everything was installed and working but up to that point it was incredibly difficult.
+
+Did the instructor provide too much information or not enough information?
+: I encountered issues while following the directions and ended up having to create work around in order to complete the process. Due to these work arounds I had issues having the libraries pre working on this poetry shell. As such I had to download every library the project uses. Additionally, despite the base python 3.11.6 having Jupyter it did not extend to the poetry shell. I was unable to see an environment for the shell in the terminal and had to create an environement specifically in the folder of the repo. This likely caused the issues but unfortunately I was unable to do this the way the directions instructed.
+
+One major recommendation I have is to double check previous Python installs. I somehow had multiple of the same python version installed and had to go through and clean that out. This process along with properly setting up shims and the bin folder for pyenv caused the issues that ultimately led to the poetry workaround.
+
+Poetry required an uninstall which after was not working due to the system seeing it as installed despite it not appear anywhere. This led to workaround that caused poetry env info to show no environement. Ultimately ending up at the solution I mentioned.
+
+Do you have suggestions for how it can be improved?
+: Better clarification for error solving and possibly a warning to check certain things prior to starting. In addition to the small uninstalls it asks you to make to double check.
+
+
+# README
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::

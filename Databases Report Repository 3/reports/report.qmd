@@ -1,0 +1,435 @@
+---
+title: Homework 3
+date: last-modified
+author:
+    - name: Vladimir Paraschiv
+      email: ParaschivV@vcu.edu
+
+format:
+  html:
+    self-contained: true
+    embed-resources: true
+    standalone: true
+---
+
+Link to my GITHUB Repo: <https://github.com/cmsc-vcu/cmsc408-fa2025-hw3-captnkristmas>
+
+# Introduction
+
+This homework focuses on designing and documenting **Entity-Relationship (ER) models** to represent real-world systems using both **Chen** and **Crow’s Foot** notations. The objective is to practice identifying entities, attributes, relationships, and constraints while learning how to express these relationships visually and formally through diagrams and relational schemas.
+
+Throughout the assignment, three systems are modeled: a **Research Lab Management System**, a **Cafeteria Management System**, and a **Library Management System**. Each example highlights different aspects of database design, including one-to-many and many-to-many relationships, participation constraints, and real-world rules such as availability, cost balance, and borrowing limits.
+
+The models are created and visualized using **Quarto**, **Graphviz (DOT)**, and **Mermaid**, producing clear and professional diagrams embedded directly into a self-contained HTML report. This exercise reinforces the core principles of database conceptual design and illustrates how documentation tools can support accuracy and readability in technical work.
+
+
+# Models
+
+Below are three entity-relation models for systems in the world around me.
+
+## Model 1 - Research Lab Management System
+
+A university research lab wants to manage its researchers, projects, and equipment. Researchers have a research ID, name, specialty, and schedule. Projects have a project Id, title, requirements, and time frame. Equipment has an equipment ID, type, and availability. Each project must involve at least two reasearchers, and each researcher can work on multiple projects. The researcher has to have matching availability to the projects time frame. Projects may require equipment, but the equipment can only be given to one project at one time.
+
+### Design choices
+
+When managing a research lab one would want to manage entities such as researchers, projects and equipement. These entities would have schedules that need to be adhered to along with projects that have their own schedules. Due to researchers specialties they may not always be interested in all the projects and as such should be represented. They may require equipment to complete the project and as such its availability and the type of equipment along with its own id needs to be accounted for. These relationships need to show that equipment is available and that researchers are available. A project would also require at least 2 researchers to properly complete it so they can check each others work and for any potential safety concerns. Each equipement is available for only one project at a time, as such should be modeled. Projects can require any amount of equipment.
+
+### Chen Diagram
+
+```{dot}
+//| label: fig-chen-1
+//| fig-cap: "A School Enrollment System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    scale=1    // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Researcher; Project; Equipment;
+    node [shape=ellipse];
+    "ResearchID (PK)", Specialty, Schedule, "ProjectID (PK)", Title, Requirement, TimeFrame, "EquipmentID (PK)", Type, Availability, Name
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "P-R"; "P-E";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "ResearchID (PK)" -- Researcher;
+    Name -- Researcher;
+    Specialty -- Researcher;
+    Schedule -- Researcher;
+    "ProjectID (PK)" -- Project; Title -- Project; Requirement -- Project;
+    TimeFrame -- Project; 
+    Project -- "P-R" [label="2,n  "]; // Edge length
+    "P-R" -- Researcher [label="0,n  "]; // Edge length
+    "EquipmentID (PK)" -- Equipment;
+    Type -- Equipment;
+    Availability -- Equipment;
+    Project -- "P-E" [label="0,n "]; // Edge length
+    "P-E" -- Equipment [label="1,1 "]; // Edge length
+
+    // Constraint notes
+    node [shape=note, style=filled, color=lightyellow];
+    Constraint1 [label="If Availability Matches"];
+
+    // Connect constraints
+    Constraint1 -- "P-R" [style=dashed];
+
+}
+
+```
+
+### Crows Foot diagram
+
+```{mermaid}
+erDiagram 
+    RESEARCHERS {
+        int researchID PK
+        string name
+        string specialty
+        int schedule
+    }
+
+    PROJECTS {
+        int projectID PK
+        string title
+        string requirement
+        int timeFrame
+    }
+
+    EQUIPMENT {
+        int equipmentID PK
+        string type
+        bool availability
+    }
+
+    PROJECTS ||--o{ RESEARCHERS : "involves if availability matches (≥2)"
+    PROJECTS o{--|| EQUIPMENT : "requires"
+```
+
+### Relational model
+
+* Researchers (<ins>researchID</ins>, name, specialty, availability )
+* Projects ( <ins>projectId</ins>, title, requirements, timeFrame )
+* Equipment ( <ins>equipmentID</ins>, type, availability )
+
+## Model 2 - Cafeteria Management System
+
+Consider a school that wants to manage students, employees, and meals. Meals have a meal ID, options, date, and cost. Students have a student ID, name, and balance. Employees have a employee ID, name, and date. Meals must have at least 5 employees to run properly, there must be at least one student but they can not surpass their balance for the meal. Employees dates must match meal dates.
+
+### Design choices
+
+A cafeteria would need to manage students, employees and their meals. In such cases they would need to account for the money in students accounts and the cost of the meals. They would also need to account for staff availability and them requiring a certain amount of staff for every meal. If there are not any students eating that day, there are no staff required. Meals have different options, different meals are served on different days. The relationships represent the payments of students and the required amount of staff for every meal. There must be at least 5 staff for every meal so they can prepare and serve the food, requiring at least 1 student to be eating. The student must have ample balance to cover the cost of meal.  
+
+### Chen Diagram
+
+```{dot}
+//| label: fig-chen-2
+//| fig-cap: "A Cafeteria Management System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    overlap=false
+    scale=1.3     // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Student; Meal; Employee
+    node [shape=ellipse]; {node [label="Name"] Name0; Name1}
+    {node [label="Date"] Date0, Date1}
+    "StudentID (PK)", Balance, "MealID (PK)", Option, Cost, "EmployeeID (PK)"
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "M-E"; "M-S";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "StudentID (PK)" -- Student;
+    Name0 -- Student;
+    Balance -- Student;
+    "MealID (PK)" -- Meal;
+    Option -- Meal;
+    Date0 -- Meal;
+    Cost -- Meal; 
+    Meal -- "M-S" [label="1,n    "]; // Edge length
+    "M-S" -- Student [label="     0,n"]; // Edge length
+    "EmployeeID (PK)" -- Employee;
+    Name1 -- Employee;
+    Date1 -- Employee;
+    Meal -- "M-E" [label="5,n"]; // Edge length
+    "M-E" -- Employee [label="0,n      "]; // Edge length
+
+    // Constraint notes
+    node [shape=note, style=filled, color=lightyellow];
+    Constraint1 [label="Student balance ≥ Meal cost"];
+    Constraint2 [label="Employee date = Meal date"];
+
+    // Connect constraints
+    Constraint1 -- "M-S" [style=dashed];
+    Constraint2 -- "M-E" [style=dashed];
+
+}
+
+```
+
+### Crows Foot diagram
+
+```{mermaid}
+erDiagram 
+    MEALS {
+        int mealID
+        string options
+        int date
+        int cost
+    }
+
+    STUDENTS {
+        int studentID
+        string name
+        int balance
+    }
+
+    EMPLOYEES {
+        int employeeID
+        string name
+        int date
+    }
+
+    MEALS ||--o{ EMPLOYEES : "involves (≥5, data matches)"
+    MEALS ||--o{ STUDENTS : "requires (balance ≥ cost)"
+```
+
+### Relational model
+
+* Meals ( <ins>mealID</ins>, options, date, cost )
+* Students ( <ins>studentID</ins>, name, balance )
+* Employees ( <ins>employeeID</ins>, name, date )
+
+## Model 3 - Library Management System
+
+A library wants to manage its borrowers, books, and librarians. Books have an ISBN, author, genre, and count. Librarians have a librarian ID, name, and availability. Borrowers have a borrower ID, name, and rentals. A borrower can have up to 2 books out at the same time, but to borrow a book at least one librarian must be available. Books can be rented out to multiple people as long as it does not exceed the count.
+
+### Design choices
+
+If a library had a system they would want to manage their librarians, books and borrowers. Books have an author, genre, isbn and a limited availability and as such should be modeled. Librarians have their own names to be identified more easily but their own ids as well. Each librarian has their own availability as well. Borrowers have their own names as well for ease of identification and an id for ease of tracking, they also have rentals they have that are tracked. One must make sure that borrowers cannot take out endless books, in case they do not return them or they damage them. As such they have a limit of 2 books out at a time. There must also be librarian available to help them an as such that must be modeled as well.
+
+### Chen Diagram
+
+```{dot}
+//| label: fig-chen-3
+//| fig-cap: "A Library Management System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    overlap=false
+    scale=1.3     // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Book; Librarian; Borrower;
+    node [shape=ellipse]; {node [label="Name"] Name0; Name1}
+    "BorrowerID (PK)", Rentals, "LibrarianID (PK)", Availability, Author, "ISBN (PK)", Genre, Count
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "BOR-BOO"; "L-BOR";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "ISBN (PK)" -- Book;
+    Author -- Book;
+    Genre -- Book;
+    Count -- Book;
+    "BorrowerID (PK)" -- Borrower;
+    Name0 -- Borrower;
+    Rentals -- Borrower; 
+    Borrower -- "BOR-BOO" [label="0,2"]; // Edge length
+    "BOR-BOO" -- Book [label="0,n     "]; // Edge length
+    "LibrarianID (PK)" -- Librarian;
+    Name1 -- Librarian;
+    Availability -- Librarian;
+    Librarian -- "L-BOR" [label="1,n"]; // Edge length
+    "L-BOR" -- Borrower [label="0,n"]; // Edge length
+
+    // Constraint notes
+    node [shape=note, style=filled, color=lightyellow];
+    Constraint1 [label="Book Loans ≤ Book Count"];
+    Constraint2 [label="Availability = True"];
+
+    // Connect constraints
+    Constraint1 -- "BOR-BOO" [style=dashed];
+    Constraint2 -- "L-BOR" [style=dashed];
+
+}
+
+```
+
+### Crows Foot diagram
+
+```{mermaid}
+erDiagram 
+    BOOKS {
+        int ISBN
+        string author
+        string genre
+        int count
+    }
+
+    LIBRARIANS {
+        int librarianID
+        string name
+        bool availability
+    }
+
+    BORROWERS {
+        int borrowerID
+        string name
+        int rentals
+    }
+
+    BORROWERS }o--o{ BOOKS : "borrows (≤2 books, ≤count)"
+    LIBRARIANS ||--o{ BORROWERS : "assists (must be available)"
+```
+
+### Relational model
+
+* Books ( <ins>ISBN</ins>, author, genre, count )
+* Librarians ( <ins>librarianID</ins>, name, availability )
+* Borrower ( <ins>borrower ID</ins>, name, rentals )
+
+# Reflection
+
+What was the most surprising (good or bad) thing that you learned by doing this assignment?
+: How difficult it is to come up with complex yet not overly complex examples of relations.
+
+How much time did you spend on this assignment?
+: Several days considering the different possible examples of relations I could create.
+
+What CS classes have you had (or have now) that the quarto math expressions and diagrams (e.g., graphviz and mermaid) would have made it easier?
+: There was one class back when I was at Brightpoint that required making diagrams for our code and this would have been helpful there.
+
+
+
+# README
+
+A quality README is an important part of EVERY project. Using the Quarto *include* command we're including a copy of your README in the project report so that a human can evaluate it.
+
+Make sure that you edit the README so that it's explanatory!  Note that you don't need a readme within the *reports* folder for this assignment. We're only
+focused on the root *README.md*.
+
+[Here is some info](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/) on how to write a good README!
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::
+
+

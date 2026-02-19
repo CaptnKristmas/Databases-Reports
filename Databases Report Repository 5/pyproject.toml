@@ -1,0 +1,18 @@
+[project]
+name = "cmsc408-fa2025-hw5-captnkristmas"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Vladimir Paraschiv",email = "vlad.paraschiv.vp@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jupyter (>=1.1.1,<2.0.0)",
+    "ipykernel (>=7.0.1,<8.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

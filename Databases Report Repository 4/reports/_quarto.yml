@@ -1,0 +1,16 @@
+project:
+    type: default
+
+date: last-modified
+
+author:
+    - name: Vladimir Paraschiv
+      email: paraschiv@vcu.edu
+
+format:
+    html:
+        embed-resources: true
+        html-math-method: katex
+        theme: spacelab
+        toc: true
+

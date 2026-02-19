@@ -1,0 +1,435 @@
+---
+title: Homework 2 - ER Diagrams - Fall 2025
+author:
+    - name: Vladimir Paraschiv
+      email: paraschivv@vcu.edu
+
+format:
+    html:
+        self-contained: true
+        embed-resources: true
+        standalone: true
+## Useful references:
+# - Basic Markdown: https://quarto.org/docs/authoring/markdown-basics.html
+# - Quarto figures: https://quarto.org/docs/authoring/figures.html
+# - HTML document basics: https://quarto.org/docs/output-formats/html-basics.html
+# - Quarto guide: https://quarto.org/docs/guide/
+# - VS Code and Quarto: https://quarto.org/docs/tools/vscode.html
+#   (RTFM and GET THE EXTENSION!!!!)
+---
+
+<!--
+Update the link below to reflect YOUR repository.
+You will NOT be scored for your README unless you include this link.  The human grader
+will follow the link to the github repo to evaluate how it looks.
+
+FYI - this is an HTML-style comment that is ignored by Quarto and Pandoc.
+    You can add them anywhere to leave breadcrumbs for yourself!
+-->
+[[Link to repository](https://github.com/cmsc-vcu/cmsc408-fa2025-hw2-CaptnKristmas)]
+
+This assignments goal is to pick three problems and create Chen and Crow's foot diagrams. These diagrams represent Entity Relation models that visually describe the attributes and relationships between the separate entitities.
+
+Entities are larger concepts. These larger concepts can then be broken down into several attributes that are important to discerning the entity. Each entity has a primary key, this is an attribute that identifies each individual entity from another. Say you need to manage students and their courses, a situation I model below, Students and Courses would be entities. There are many students in a school and many courses. In order to discern different students and different courses they each have primary key attributes, like studentID or courseID. Relationships are made between them based on necessities for the system. Such as each student can have many classes and classes can have many students, this for example is a many to many relationship.
+
+Entities are squares, attributes are ovals (primary keys are usually underlined or labled), and diamonds are relationships in Chen Diagrams. The numbers on the lines are the cardinality or how much of each must be inlcuded and how many can be included in that order. N or M represent many and are used interchangably. If you see both, it represents different many's.
+
+In Crows Foot Diagrams tables titles are entities, attributes are listed under the table and the primary key is listed on the table in a separate column. There is also a separate column for the type of attribute, int or string etc. Their relationship is showed to the side. A trident represents many and two lines represent at least one.
+
+# ER Modeling Exercises
+
+## School Course Enrollment System
+
+Imagine a school that needs to manage Courses, Students, and enrollments. Each Course has a Course ID, title, and credits. Students have a Student ID, name, and enrollment date. Enrollments have an enrollment ID, enrollment date, and grade. A Student can enroll in multiple Courses, and each Course can have multiple Students. Each enrollment is associated with a single Student enrolling in a single Course.
+
+### Conceptual design in Chen Notation
+
+The diagram depicts a many to many relationship between Students and Courses resolved via the associative entity Enrollment. Courses and Students each have a one to many relationship with Enrollments. Students and Courses must each refer to exactly one Enrollment. Each of these entities has their own attributes. CourseID being the primary key for Course, EnrollementID being the primary key for Enrollements and StudentID being the primary key for Students.
+
+```{dot}
+//| label: fig-chen-1
+//| fig-cap: "A School Enrollment System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    scale=1.3     // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Course; Enrollment; Student;
+    node [shape=ellipse];
+    {node [label="Enrollment Date"] Enrollment Date0; Enrollment Date1}
+    "CourseID (PK)"; Title; Credits; "StudentID (PK)"; Name; "EnrollmentID (PK)"; Grade;
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "C-E"; "S-E";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "CourseID (PK)" -- Course;
+    Title -- Course;
+    Credits -- Course;
+    Enrollment Date0 -- Enrollment;
+    "EnrollmentID (PK)" -- Enrollment;
+    Grade -- Enrollment;
+    Enrollment -- "S-E" [label="0,n      "]; // Edge length
+    "S-E" -- Student [label="1,1   "]; // Edge length
+    "StudentID (PK)" -- Student;
+    Name -- Student;
+    Enrollment Date1 -- Student;
+    Enrollment -- "C-E" [label="0,n"]; // Edge length
+    "C-E" -- Course [label="1,1"]; // Edge length
+
+}
+
+```
+
+### Conceptual design in Crows foot notation
+
+Entities are Courses, Students and Enrollments. Students has attributes: int courseID (the primary key), string title, and string credits. Courses has attributes: int courseID (the primary key), string name, and int enrollmentDate. Enrollments has attributes: int enrollmentID (the primary key), int enrollmentDate, int grade. Student is connected via a one to many takes relationship to Enrollment and Course is connected via a one to many has relationship to Enrollement. 
+
+```{mermaid}
+erDiagram 
+    Courses {
+        int courseID PK
+        string title
+        string credits
+    }
+
+    Students {
+        int studentID PK
+        string name
+        int enrollmentDate
+    }
+
+    Enrollments {
+        int enrollmentID PK
+        int enrollmentDate
+        int grade
+    }
+
+    STUDENT ||--o{ ENROLLMENT : "takes" 
+    COURSE ||--o{ ENROLLMENT : "has"
+```
+
+### Design assumptions, considerations and tradeoffs
+
+The first assumption I had was to make Students have a many to many relationship with Courses and then a one to one relationship with Enrollments. I then questioned how this would properly connect to Courses to track the information leading me to believe a ternary relationship would be best. I remembered it is best to avoid this and decided using Enrollments as the associative identity would be best.
+
+### Relation sets
+
+The following are the initial relation sets for the system:
+
+* Course( <ins>courseID</ins>, title, credits )
+* Students( <ins>studentID</ins>, name, enrollmentDate )
+* Enrollment( <ins>enrollmentID</ins>, enrollmentDate, Grade )
+
+## Healthcare Appointment Management System
+
+Consider a healthcare clinic that wants to manage patients, doctors, and appointments. Each patient has a patient ID, name, date of birth, and contact information. Doctors have a doctor ID, name, specialty, and contact number. Appointments have an appointment ID, date, time, and status. A patient can schedule multiple appointments, and each appointment is with a single doctor. A doctor can have multiple appointments, but each appointment is associated with only one patient.
+
+### Conceptual design in Chen Notation
+
+The diagram depicts a many to one relationship between Doctors and Appointments and many to one relationship between Patients and Appointments. Each Appointment must have exactly one Doctor and one Patient. Each of these entities has several attributes with doctorID being the primary key for Doctors, appointmentID being the primary key for Appointments, and patientID being the primary key for Patients.
+
+```{dot}
+//| label: fig-chen-1
+//| fig-cap: "A Healthcare Appointment Management System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    scale=1.3     // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Doctor; Appointment; Patient;
+    node [shape=ellipse];
+    {node [label="Name"] Name0; Name1}
+    "PatientID (PK)"; DoB; "Contact Information"; "DoctorID (PK)"; Specialty; "Contact Number"; "AppointmentID (PK)"; Date; Time; Status
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "D-A"; "P-A";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "PatientID (PK)" -- Patient;
+    DoB -- Patient;
+    "Contact Information" -- Patient;
+    Name0 -- Patient;
+    Patient -- "P-A" [label ="0,m   "];
+    "P-A" -- Appointment [label ="1,1   "];
+    "AppointmentID (PK)" -- Appointment;
+    Date -- Appointment;
+    Time -- Appointment;
+    Status -- Appointment;
+    Doctor -- "D-A" [label="0,m  "]; // Edge length
+    "D-A" -- Appointment [label="1,1  "]; // Edge length
+    "DoctorID (PK)" -- Doctor;
+    Name1 -- Doctor;
+    Specialty -- Doctor;
+    "Contact Number" -- Doctor;
+}
+
+```
+
+### Conceptual design in Crows foot notation
+
+The entities are Patients, Doctors and Appointments. Patients has attributes: int patientID (the primary key), int dob, string name, and string contactInformation. Doctors has attributes: int doctorID (the primary key), string name, string specialty, int contactNumber. Appointments has attributes: int appointmentID (the primary key), int time, int date, and int status. Patient is connected via a one to many makes relationship with Appointment and Doctor is conncted via a one to many relationship with Appointment.
+
+```{mermaid}
+erDiagram 
+    Patients {
+        int patientID PK
+        int dob
+        string name
+        string contactInformation
+    }
+
+    Doctors {
+        int doctorID PK
+        string name
+        string specialty
+        int contactNumber
+    }
+
+    Appointments {
+        int appointmentID PK
+        int time
+        int date
+        int status
+    }
+
+    PATIENT ||--o{ APPOINTMENT : "makes" 
+    DOCTOR ||--o{ APPOINTMENT : "has"
+```
+
+### Design assumptions, considerations and tradeoffs
+
+This was less difficult to process for me then the first one. I could see the relationships that needed to be made pretty easily. The main consideration was how to treat certain attributes. Is status an int or a string? What about dob and contactInformation? I decided that status would be best as an int to represent several different states. Dob would be easiest to deal with as an int so I chose that. Contact Information could be an email as well so I chose string.
+
+### Relation sets
+
+The following are the initial relation sets for the system:
+
+* Patient( <ins>patientID</ins>, dob, name, contactInformation )
+* Appointment( <ins>appointmentID</ins>, status, time, date )
+* Doctor( <ins>doctorID</ins>, name, contactNumber, specialty )
+
+## Restaurant Reservation System
+
+Envision a restaurant that wants to manage reservations, customers, and tables. Each reservation has a reservation ID, date, and time. Customers have a customer ID, name, and contact number. Tables have a table number, seating capacity, and location. A customer can make multiple reservations, and each reservation is for a single table. Each table can have multiple reservations over time, but each reservation is associated with only one customer
+
+### Conceptual design in Chen Notation
+
+The diagram depicts a many to one relationship between Table and Reservation and many to one relationship between Customer and Reservation. Each Reservation must have exactly one Table and one Customer. Each of these entities has several attributes with tableNumber being the primary key for Table, reserveationID being the primary key for Appointments, and customerID being the primary key for Customer.
+
+```{dot}
+//| label: fig-chen-1
+//| fig-cap: "A Restaurant Reservation System Chen Diagram"
+//| fig-width: 100%
+graph ER {
+    // "graph" creates undirected graphs.  It can be used for more than just ER diagrams!
+    // There are many different layouts.  We're going to use layout=neato 
+    // See: https://graphviz.org/
+    //      https://graphviz.org/doc/info/lang.html
+    //      https://graphviz.org/docs/layouts/
+    //      https://graphviz.org/docs/layouts/neato/
+
+
+    // these commands apply only to the main title/label
+    // I added them as a demonstration of how to add a title.
+    // Since we're using Quarto, I suggest DELETING or commenting these out.
+    //fontname="Helvetica,Arial,sans-serif"
+    //fontsize=30;   // Font size for the entire graph
+    //label="(remove this title from your final draft!)";
+    //labelloc="t";  // "t"op, "b"ottom, "c"enter of graph
+    //labeljust="c"; // "l"eft, "c"enter, "r"ight
+
+    // I picked RED to make the canvas of the diagram clearer.
+    // Your final figure should use bgcolor=transparent
+    
+    bgcolor=transparent;   // Use bgcolor=transparent for final plot
+
+    //these are useful, but appear not to work with layout=neato
+    //nodesep=2.00;  // Separation between nodes on the same level
+    //ranksep=0.80;  // Separation between nodes on different levels
+    //size="4,4";    // Graph size
+    //center=false   // Center diagram within graph canvas.
+
+    // See: https://graphviz.org/docs/layouts/neato/
+    layout=neato  // Very useful for auto placing nodes.  Minimizes node/edge energy in system
+    scale=1.3     // changes size of shapes all at once
+
+
+    // Set defaults for nodes
+    node [fontname="Helvetica,Arial,sans-serif",fontsize=10] // Smaller font size, reduced node size
+
+    // Define nodes
+    node [shape=box];
+    Reservation; Customer; Table;
+    node [shape=ellipse];
+    "ReservationID (PK)"; Time; Date; "CustomerID (PK)"; Name; "Table Number (PK)"; "Seating Capacity"; "Contact Number"; Location
+
+    
+    node [shape=diamond,style=filled,color=lightgrey]; 
+    "Makes"; "Has";
+
+    // Set defaults for edges then draw edges
+    edge [fontname="Helvetica,Arial,sans-serif",fontsize=10, ] // Reduced font size for edges
+
+    // Define edges
+    "CustomerID (PK)" -- Customer;
+    Name -- Customer;
+    "Contact Number" -- Customer;
+    Customer -- "Makes" [label ="0,m  "];
+    "Makes" -- Reservation [label ="1,1     "];
+    "ReservationID (PK)" -- Reservation;
+    Date -- Reservation;
+    Time -- Reservation;
+    Table -- "Has" [label="0,m "]; // Edge length
+    "Has" -- Reservation [label="1,1 "]; // Edge length
+    Location -- Table;
+    "Seating Capacity" -- Table;
+    "Table Number (PK)" -- Table;
+}
+
+```
+
+### Conceptual design in Crows foot notation
+
+The entities are Tables, Reservations and Customers. Tables has attributes: int tableNumber (the primary key), int seatingCapacity, and string location. Reservations has attributes: int reservationID (the primary key), int time, and int date. Customers has attributes: int customerID (the primary key), string name, and int contactNumber. Customer is connected via a one to many makes relationship with Reservation and Table is conncted via a one to many relationship with Reservation.
+
+```{mermaid}
+erDiagram 
+    Customers {
+        int customerID pk
+        string name
+        int contactNumber
+    }
+
+    Tables {
+        int tableNumber pk
+        int seatingCapacity
+        string location
+    }
+
+    Reservations {
+        int reservationID pk
+        int time
+        int date
+    }
+
+    CUSTOMER ||--o{ RESERVATION : "makes" 
+    TABLE ||--o{ RESERVATION : "has"
+```
+
+### Design assumptions, considerations and tradeoffs
+
+Similar to the last one the relationships were pretty easy to figure out. This time the consideration was as to what was the primary key for table. Should it be location or tableNumber? I ended up deciding the best choice was tableNumber due to location possibly being similar.
+
+### Relation sets
+
+The following are the initial relation sets for the system:
+
+* table( <ins>tableNumber</ins>, location, seatingCapacity )
+* reservation( <ins>reservationID</ins>, date, time )
+* customer( <ins>customerID</ins>, contactNumber, name )
+
+
+# Reflection
+
+(fill in the *answer here* blocks below.  Keep the existing formatting to see what a definition format looks like.)
+
+What do you find most difficult about the assignment?
+: Figuring out how to create the chen diagrams and the school system took a bit of time to create properly.
+
+What do you find easiest about the assignment?
+: I actually believe I have made mermaid diagrams before. This was incredibly easy and by far the easiest part.
+
+What did you learn that will name the next assignment easier?
+: I learned how dot diagrams are made and how to better analyze situations in order to create effective and accurate ER Diagrams.
+
+# README.md
+
+A quality README is an important part of EVERY project. Using the Quarto *include* command we're including a copy of your README in the project report so that a human can evaluate it.
+
+Make sure that you edit the README so that it's explanatory!  Note that you don't need a readme within the *reports* folder for this assignment. We're only
+focused on the root *README.md*.
+
+[Here is some info](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/) on how to write a good README!
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::
