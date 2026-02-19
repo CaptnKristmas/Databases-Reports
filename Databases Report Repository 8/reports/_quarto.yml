@@ -1,0 +1,19 @@
+
+author:
+    - name: Vladimir Paraschiv
+      email: paraschivv@vcu.edu
+
+date: 12/4/2025
+
+format:
+    html:
+        theme: cosmo
+        toc: true
+        embed-resources: true
+        code-copy: true
+
+execute:
+  echo: true
+  eval: true
+  cache: false
+  python: "C:/Users/vladp/AppData/Local/pypoetry/Cache/virtualenvs/hw8-cmsc408-fa2025-6ssj81kd-py3.11/Scripts/python.exe"

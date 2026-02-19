@@ -1,0 +1,264 @@
+---
+title: Homework 6 - Creating a resume database
+format:
+  html:
+    self-contained: true
+    embed-resources: true
+    standalone: true
+---
+
+This document contains information about a database containing *people*, *skills*, and *peopleskills* tables. These tables are represented as a Crows-Foot diagram and some lists along with descriptions for those sections. At the end there is a reflection and a read me.
+
+GITHUB URL:  <https://github.com/cmsc-vcu/cmsc408-fa2025-hw6-CaptnKristmas>
+
+
+```{python}
+from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file
+from itables import show
+
+# Load these variables from .env file.
+config_map = {
+  'user': "MYSQL_USERNAME",
+  'password': "MYSQL_PASSWORD",
+  'host': "MYSQL_HOSTNAME",
+  'database': "HW6_DB_NAME"
+}
+
+cnx,config = create_db_wrapper( config_map )
+  
+
+def show_result_set( sql, **kwargs ):
+    df = run_sql_and_return_df( cnx,sql )
+    show(df,**kwargs)
+
+```
+
+## Overview and description
+
+The database contains 3 tables, *people*, *skills*, and *peopleskills*. The first covers the employees of the company, the second possible skills, and last tracks the skills earned. As such there is a relationship between *people* and *peopleskills* as well as *skills* and *peopleskills*. This allows us to connect the skills possibly earned with the employees and store what people have earned in people skills.
+
+We were tasked with creating this database using mySQL, Python, a poetry shell, and multiple libraries listed in the readme. Following this we were tasked with completing this report that breaks down contents of the database via a Crows-Foot diagram, descriptions and some lists. Upon completion we rendered this document as an html that you may view.
+
+## Crows-foot diagram
+
+This diagram represents the current database as a whole. Do to limitations we are unable to represent nullable and non nullable values and are also unable to represent varchar directly. This is instead just ignored and replaced with string respectively. We are able to represent the foreign keys and the primary keys on the diagram.
+
+The connection between *people* and *peopleskills* as well as *skills* and *peopleskills* is represented via the diagram. It shows how exactly one person can have multiple skills tracked and exactly one skill can be tracked across many people.
+
+```{mermaid}
+%%| echo: false
+erDiagram
+    PEOPLE ||--o{ PEOPLESKILLS : "has"
+    SKILLS ||--o{ PEOPLESKILLS : "tracks"
+
+    PEOPLE {
+        int id PK
+        string first_name
+        string last_name
+        string email
+        string linkedin_url
+        string headshot_url
+        string discord_handle
+        string brief_bio
+        date date_joined
+    }
+
+    SKILLS {
+        int id PK
+        string name
+        string description
+        string tag
+        string url
+        string time_commitment
+    }
+
+    PEOPLESKILLS {
+        int id PK
+        int skills_id FK
+        int people_id FK
+        date date_acquired
+    }
+```
+
+## Loading the database
+
+```{python}
+#| output: asis
+
+ddl_file_name = "./my-ddl.sql"
+messages,errors = execute_ddl_from_file( ddl_file_name, cnx)
+
+if errors:
+    for error in errors:
+        print(f"{error}<br/>")
+else:
+    print(f"No errors detected while loading: {ddl_file_name}")
+```
+
+
+## Examples of data in the database
+
+The following sections provide an overview of the schema including table names, and number of rows and columns in each table.
+
+For each table, a description of each table is presented along with it's contents.
+
+### Tables and metrics in the database
+
+```{python}
+#| echo: false
+sql = f"""
+WITH TableInfo AS (
+    SELECT 
+        table_name AS TableName,
+        table_rows AS RecordCount
+    FROM 
+        information_schema.tables
+    WHERE 
+        table_schema = DATABASE()
+),
+ColumnInfo AS (
+    SELECT 
+        table_name AS TableName,
+        COUNT(column_name) AS ColumnCount
+    FROM 
+        information_schema.columns
+    WHERE 
+        table_schema = DATABASE()
+    GROUP BY 
+        table_name
+)
+SELECT 
+    t.TableName,
+    t.RecordCount,
+    c.ColumnCount
+FROM 
+    TableInfo t
+JOIN 
+    ColumnInfo c ON t.TableName = c.TableName;
+"""
+run_sql_and_return_html( cnx, sql )
+```
+
+```{python}
+x = show_result_set( sql )
+```
+
+### People table
+
+The *people* table is a list of employees at the company currently. It includes the id, first name, last name, email, linkedin url (if they have one), headshot url (if they have one), discord handle (if they have one), brief bio (if included), and the date joined at the company.
+
+Below is data currently in the *people* table.
+
+```{python}
+show_result_set( f"""
+select * from people;
+""" )
+```
+
+### Skills table
+
+The *skills* table is a list of skills that employees might have at this company. It includes the name, description, tag (for reference), url link for information, and estimated time commitment needed to gain the skill.
+
+Below is data currently in the *skills* table.
+
+```{python}
+show_result_set( f"""
+select * from skills
+""" )
+```
+
+### PeopleSkills table
+
+The *peopleskills* table is a link between emplopyees and skills. The table shows what skills have been acquired by which employees along with the date acquired. It allows the company to keep track of progress and assists in project assignment.
+
+Below is data currently in the *peopleskills* table.
+
+```{python}
+show_result_set(f"""
+select * from peopleskills
+""" )
+```
+## Queries
+
+### List skill id, name and tag ordered by name
+
+```{python}
+show_result_set( f"""
+select id, name, tag from skills order by name
+""" )
+```
+
+### List people names and email addresses ordered by last_name
+
+```{python}
+show_result_set( f"""
+select first_name, last_name, email 
+from people 
+order by last_name
+""" )
+```
+
+
+### List skill names of Person 1
+
+```{python}
+show_result_set( f"""
+select  s.name as skill_name, ps. date_acquired
+from peopleskills ps
+join people p on ps.people_id = p.id
+join skills s on ps.skills_id = s.id
+where p.last_name = 'Person 1'
+order by ps.date_acquired;
+""" )
+```
+
+### List people names with Skill 6
+
+```{python}
+show_result_set( f"""
+select p.first_name, p.last_name, 
+    ps.date_acquired
+from people p 
+join peopleskills ps on p.id = ps.people_id 
+where ps.skills_id = 6
+order by date_acquired;
+""" )
+```
+
+
+### List names and email addresses of people without skills
+
+```{python}
+show_result_set( f"""
+select p.first_name, p.last_name, p.email 
+from people p
+left join peopleskills ps on p.id = 
+    ps.people_id
+where ps.id is null
+order by last_name;
+""" )
+```
+
+### List names and tags of unused skills
+
+```{python}
+show_result_set( f"""
+select s.name, s.tag
+from skills s
+left join peopleskills ps on s.id = 
+    ps.skills_id
+where ps.id is null
+order by s.tag;
+""" )
+```
+
+
+## Reflection
+
+The assignment provides me with wonderful skills that are applicable to personal projects, organization or working at my future career. At the same time, there were major issues that crept up even after set up with dependencies randomly showing up as not installed that required uninstalls and restarts of Virtual Studio Code then reinstalls to fix. Took a while to discover this fix which added to the struggle quite a bit. This simply leads me to believe its more efficient to constantly update important code to new versions as opposed to dealing with poetry, pyenv and managing version control at all.
+
+# README
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::

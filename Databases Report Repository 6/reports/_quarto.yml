@@ -1,0 +1,17 @@
+
+author:
+    - name: Vladimir Paraschiv
+      email: ParaschivV@vcu.com
+
+date: 10/25/2025
+
+format:
+    html:
+        theme: cosmo
+        toc: true
+        embed-resources: true
+        code-copy: true
+
+execute:
+  echo: false
+  eval: true

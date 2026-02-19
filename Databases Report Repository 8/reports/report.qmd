@@ -1,0 +1,674 @@
+---
+title: Homework 8 - World Bank Analysis
+format: 
+  html:
+    self-contained: true
+    embed-resources: true
+    standalone: true
+
+author:
+  - name: Vladimir Paraschiv
+    email: paraschivv@vcu.edu
+date: '2025-12-04'
+theme: cosmo
+jupyter: python3
+code-copy: true
+execute:
+  echo: false
+  warning: false
+  error: false
+---
+
+GITHUB URL:  <https://github.com/cmsc-vcu/cmsc408-fa2025-hw8-CaptnKristmas>
+
+
+# Problem Background
+
+
+```{python}
+from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file, execute_ddl
+from itables import show
+
+# Load these variables from .env file.  You should only need to change database!
+config_map = {
+  'user': "MYSQL_USERNAME",
+  'password': "MYSQL_PASSWORD",
+  'host': "MYSQL_HOSTNAME",
+  'database': "HW8_DB_NAME"  # <--  make sure this exists in your .env file!
+}
+
+cnx,config = create_db_wrapper( config_map )
+  
+```
+
+
+```{python}
+# Do a quick test of the connection and trap the errors better!
+
+run_sql_and_return_html(cnx,"""
+select
+  table_schema, table_name, table_rows
+from
+  information_schema.tables
+where
+  table_schema in ('world_bank_data')
+""")
+
+```
+
+# Exercises
+
+In the following exercises, write the SQL as requested to discover the answer.
+
+## Task 1
+
+How many records are in the country table?
+
+```{python}
+# How many records are in the world_bank_data.wdi_country table?
+# (skills: select, aggregate)
+
+sql = """
+select
+  count(*) as "Row Count"
+from
+  world_bank_data.wdi_country
+"""
+html = run_sql_and_return_html(cnx,sql)
+
+html
+
+```
+
+## Task 2
+
+Explore the first 5 records in the country table.
+
+### Show as HTML file
+
+```{python}
+## write out the first 10 records and look at the columns
+## Do you see any blanks or missing data?
+## (skills: select, limit)
+
+run_sql_and_return_html(cnx,"""
+select
+  *
+from 
+  world_bank_data.wdi_country
+limit 5
+""")
+
+```
+
+### Display interactively using ```show``` function
+
+```{python}
+df = run_sql_and_return_df(cnx,"""
+select * from world_bank_data.wdi_country
+""")
+show(df,maxBytes="128KB")
+```
+
+
+## Task 3
+
+List all non-countries.
+
+```{python}
+## task 3
+## Which records are NOT for countries, that is they're for regions or groups of countries.
+## How can you tell?
+## Once you figure it out, write a query to list all the non-countries
+## (skills: select, where)
+
+run_sql_and_return_html(cnx,"""
+select `Short Name` as "Country Name"
+FROM world_bank_data.wdi_country
+WHERE `Region` IS NULL
+ORDER BY `Short Name`;
+""")
+```
+
+## Task 4
+
+Create your own copy of WDI_Country containing just countries.
+
+```{python}
+## task 4
+## The WDI table clearly contains information for countries and non-countries
+## using CREATE TABLE ... SELECT from WHERE syntax.
+## Finally, below write a query to return the number
+## of records in the new table.
+## (skills: select, aggregate)
+
+# drop table
+execute_ddl(cnx,"""
+drop table if exists my_wdi_country;
+""")
+```
+
+```{python}
+# create table - make a copy of wdi_country in your own database
+execute_ddl(cnx,"""
+CREATE TABLE my_wdi_country AS
+SELECT *
+FROM world_bank_data.wdi_country
+WHERE `Region` IS NOT NULL;
+""")
+```
+
+```{python}
+# show number of records you just copied
+run_sql_and_return_html(cnx,"""
+select COUNT(*)
+AS "Count"
+FROM my_wdi_country;
+""")
+```
+
+## Task 5
+
+According to the World Bank, in 2020 there were how many countries in the world?
+
+```{python}
+## (skills: select, aggregate)
+
+run_sql_and_return_html(cnx,"""
+select COUNT(*)
+AS "# of Countries 2020"
+FROM my_wdi_country;
+""")
+
+```
+
+## Task 6
+
+What are all unique values of region in the wdi_country table?
+
+```{python}
+## Let's investigate the country_region field.
+## What is the domain of the country_region field? That is,
+## what are the unique values found there?
+## (there are several possible ways to code this in SQL)
+## (skills: select, aggregate, order by)
+
+run_sql_and_return_html(cnx,"""
+select DISTINCT `Region`
+FROM my_wdi_country
+ORDER BY `Region`;
+""")
+
+```
+
+## Task 7
+
+How many countries are in each region?
+
+```{python}
+## How many countries are in each region?
+## (skills: select, aggregate, group by, order by)
+
+run_sql_and_return_html(cnx,"""
+select `Region`, COUNT(*) AS "# of Countries"
+FROM my_wdi_country
+GROUP BY `Region`
+ORDER BY `Region`
+""")
+
+```
+
+## Task 8
+
+List the country full names and regions for all countries in north america.
+
+```{python}
+## List the country full names and regions for all countries in north america
+## (skills: select, where, order by)
+
+run_sql_and_return_html(cnx,"""
+select `Long Name`, `Region`
+FROM my_wdi_country
+WHERE `Region` = 'North America'
+ORDER BY `Long Name`;
+""")
+
+```
+
+## Task 9
+
+```{python}
+## The last World Cup soccer tournament was hosted by Qatar.
+## What region contains Qatar?  List the region, country short name and full name
+## (skills: select, where)
+
+run_sql_and_return_html(cnx,"""
+select `Region`, `Short Name`, `Long Name`
+FROM my_wdi_country
+WHERE `Short Name` = 'Qatar';
+""")
+
+```
+
+## Task 10
+
+```{python}
+## There are two abbreviation fields in the data country_abbr and country_wb_abbr.
+## List the country code, short name, abbr, wb_abbr and region for all the countries
+## where the abbr and wb_abbr are different.
+## (skills: select, where, order by)
+
+run_sql_and_return_html(cnx,"""
+select `Country Code`, `Short Name`, `2-alpha code`, `WB-2 code`, `Region`
+FROM my_wdi_country
+WHERE `2-alpha code` != `WB-2 code`
+ORDER BY `Short Name`;
+""")
+
+```
+
+## Task 11
+
+```{python}
+## Now, let's investigate the "income category" field.
+## List the income categories and the number of countries in each
+## income category in descending order of most countries to least.
+## (skills: select, aggregate, group by, order by)
+
+run_sql_and_return_html(cnx,"""
+select `Income Group`, COUNT(*) AS "# of Countries"
+FROM my_wdi_country
+GROUP BY `Income Group`
+ORDER BY COUNT(*) DESC;
+""")
+
+```
+
+## Task 12
+
+```{python}
+## Mystery task.  Looking at the table from Task 11 (anything odd?) write the
+## next obvious query based on the results in the table.
+## At a minimum, your query should put country short name in the first column.
+## you will be scored on the number of records returned and the value(s) 
+## in the first column.
+
+execute_ddl(cnx,"""
+UPDATE my_wdi_country
+SET `Income Group` = NULL
+WHERE `Short Name` = 'Venezuela, RB';
+""")
+
+run_sql_and_return_html(cnx,"""
+SELECT `Short Name`, `Country Code`, `Income Group`
+FROM my_wdi_country
+WHERE `Income Group` IS NULL;
+""")
+
+```
+
+## Task 13
+
+```{python}
+## OK, this HAS to be an error. Let's make a assumption that the country 
+## in question, because they are oil-rich, are "high income".  
+## Write an update comment to correct the issue.
+## NOTE - if you get this wrong, all subsequent tables will be wrong!
+
+execute_ddl(cnx, """
+DROP TABLE IF EXISTS my_wdi_country;
+""")
+
+execute_ddl(cnx, """
+CREATE TABLE my_wdi_country AS
+SELECT *
+FROM world_bank_data.wdi_country
+WHERE `Region` IS NOT NULL;
+""")
+
+execute_ddl(cnx,"""
+UPDATE my_wdi_country
+SET `Income Group` = 'High income'
+WHERE `Country Code` = 'VEN';
+""")
+```
+```{python}
+## Now, display the country again to verify the change stuck!
+
+run_sql_and_return_html(cnx,"""
+select `Country Code`, `Short Name`, `Income Group`
+FROM my_wdi_country
+WHERE `Country Code` = 'VEN';
+""")
+
+```
+
+## Task 14
+
+```{python}
+## Write a single query that show the number of countries in each 
+## "Region"-"Income Group" pair.  The table should have 3 columns:
+## region, income group, and no.of.countries.
+## (skills: select, aggregate, group by, order by)
+
+run_sql_and_return_html(cnx,"""
+select `Region`, `Income Group`, COUNT(*) AS `# of Countries`
+FROM my_wdi_country
+WHERE `Region` IS NOT NULL AND `Income Group` IS NOT NULL
+GROUP BY `Region`, `Income Group`
+ORDER BY `Region`, `Income Group`;
+""")
+
+```
+
+## Task 15
+
+```{python}
+## Examine the result from task 14. It would be really cool to
+## present the results of this table in a 2-D form, with 
+## columns for each income category (high, upper middle, lower middle, low, other)
+## regions down the side, and the pair-wise count inside each cell.
+## Using CASE statements, DO IT!  BE SURE to include the countries without
+## an income category.
+
+## HINT - your query should return 6 columns: the region name, one
+## column for each of the income categories (e.g., High, Upper middle, etc.)
+## and a column for the row totals.
+## (skills: select, aggregate, group by, nested query)
+
+run_sql_and_return_html(cnx,"""
+select `Region`,
+       SUM(CASE WHEN `Income Group`='High income' THEN 1 ELSE 0 END) AS `High income`,
+       SUM(CASE WHEN `Income Group`='Upper middle income' THEN 1 ELSE 0 END) AS `Upper middle income`,
+       SUM(CASE WHEN `Income Group`='Lower middle income' THEN 1 ELSE 0 END) AS `Lower middle income`,
+       SUM(CASE WHEN `Income Group`='Low income' THEN 1 ELSE 0 END) AS `Low income`,
+       COUNT(*) * 1.0 AS Total
+FROM my_wdi_country
+GROUP BY `Region`
+ORDER BY `Region`;
+""")
+
+```
+
+## Task 16
+
+```{python}
+## Wow! what a cool table!  It is very interesting to see where the money
+## sits around the world.  Using the general approach from Task 14 above
+## and write a query to return the single region with the most lower-income
+## countries.
+
+## Your query should return 3 columns, the number of 
+## low-income countries, the region name and the income group
+
+## PUT THE NUMBER FIRST! (use: count, region name, income group)
+## (skills: select, aggregate, group by, nested query, order by, limit)
+
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*) AS low_income_count, `Region`, 'Low income' AS "Income Group"
+FROM my_wdi_country
+WHERE `Income Group`='Low income'
+GROUP BY `Region`
+ORDER BY low_income_count DESC
+LIMIT 1;
+""")
+
+```
+
+## Task 17
+
+```{python}
+## Are you getting the hand of this? Good! We need to take a look at all
+## the countries in the same region and with the same income category as
+## the Marshall Islands.
+## For each country that matches, print their country code, short name,
+## region and income category, by order of their short name.  As a hint,
+## the country code for the Marshall Islands is MHL.
+## (skills: select, where, subquery)
+
+run_sql_and_return_html(cnx,"""
+select `Country Code`, `Short Name`, `Region`, `Income Group`
+FROM my_wdi_country
+WHERE `Region` = (SELECT `Region` FROM my_wdi_country WHERE `Country Code`='MHL')
+  AND `Income Group` = (SELECT `Income Group` FROM my_wdi_country WHERE `Country Code`='MHL')
+ORDER BY `Short Name`;
+""")
+
+```
+
+## Task 18
+
+```{python}
+## OK - let's raise the heat in the kitchen! Review the output from task 14.
+## You'll see that some of the regions do not contain all of the income
+## levels.  For example, the Europe & Central Asia region does not have
+## any low income countries.
+##
+## CHALLENGE - using a SINGLE SQL statement, write a table that contains every
+## combination of region and income category (including the missing '') values!
+##
+## THEN add a WHERE clause to only show the values that were missing from
+## the original pairings!
+##
+## HINT - there should be AT MOST [# of regions]x[# of income cats] = 28
+## rows in your final table, and there are 22 rows returned in the query
+## in Task 14.  (FYI - I get 6 rows in my final table.)
+## (skills: select, where, subqueries, joins)
+
+run_sql_and_return_html(cnx,"""
+with all_combinations as (
+    select r.`Region`, i.`Income Group`
+    from (select distinct `Region` from my_wdi_country WHERE `Region` IS NOT NULL) r
+    cross join (select distinct `Income Group` from my_wdi_country WHERE `Income Group` IS NOT NULL) i
+),
+existing as (
+    select `Region`, `Income Group`
+    from my_wdi_country
+    WHERE `Region` IS NOT NULL AND `Income Group` IS NOT NULL
+)
+select ac.`Region`, ac.`Income Group`, 0 AS "# of Countries"
+from all_combinations ac
+left join existing e
+on ac.`Region` = e.`Region`
+and ac.`Income Group` = e.`Income Group`
+where e.`Region` is null
+ORDER BY ac.`Region`, ac.`Income Group`;
+""")
+
+```
+
+## Task 19
+
+```{python}
+## Hot enough, yet?  Let's go for ghost-pepper HOT!  Now let's build some
+## percentage tables.  For example, across the entire sample, what
+## is the percentage of total countries in each income category?
+##
+## As a first step, build off the result from task 14 and create a table with
+## six columns (region, income cat, country count, sum of countries in region,
+## sum of countries by income and total sum countries).
+##
+## THEN, add a 7th column calculating the percent of total for each,
+## region-income pair.
+##
+## actually calculating percentages and print out a table will be a
+## slam dunk after this!
+## (skills: select, where, subqueries, joins, aggregate functions)
+
+run_sql_and_return_html(cnx,"""
+WITH fixed_data AS (
+    SELECT 
+        `Region`,
+        CASE 
+            WHEN `Country Code` = 'VEN' THEN 'High income'
+            ELSE `Income Group`
+        END AS `Income Group`
+    FROM my_wdi_country
+),
+base AS (
+    SELECT `Region`, `Income Group`, COUNT(*) AS Count
+    FROM fixed_data
+    GROUP BY `Region`, `Income Group`
+),
+region_totals AS (
+    SELECT `Region`, COUNT(*) AS "Region Total"
+    FROM fixed_data
+    GROUP BY `Region`
+),
+income_totals AS (
+    SELECT `Income Group`, COUNT(*) AS income_total
+    FROM fixed_data
+    GROUP BY `Income Group`
+),
+overall_total AS (
+    SELECT COUNT(*) AS "Total Countries"
+    FROM fixed_data
+)
+SELECT 
+    base.`Region`,
+    base.`Income Group`,
+    base.Count,
+    region_totals.`Region Total`,
+    COALESCE(income_totals.income_total, 0) AS "Income Total",
+    overall_total.`Total Countries`,
+    ROUND(base.Count * 100.0 / overall_total.`Total Countries`, 1) AS "Percent Total"
+FROM base
+JOIN region_totals ON base.`Region` = region_totals.`Region`
+LEFT JOIN income_totals ON base.`Income Group` = income_totals.`Income Group` OR (base.`Income Group` IS NULL AND income_totals.`Income Group` IS NULL)
+CROSS JOIN overall_total
+ORDER BY base.`Region`, base.`Income Group`;
+""")
+
+
+```
+
+## Task 20
+
+```{python}
+## SLAM DUNK TIME!  Using the resulting table CTEs from Task 19,
+## print table similar to the table in Task 15, with Income group in the
+## columns, Region in the rows and Percent of total in each cell of the table.
+
+run_sql_and_return_html(cnx,"""
+WITH fixed_data AS (
+    SELECT 
+        `Region`,
+        CASE 
+            WHEN `Country Code` = 'VEN' THEN 'High income'
+            ELSE `Income Group`
+        END AS `Income Group`
+    FROM my_wdi_country
+),
+base AS (
+    SELECT `Region`, `Income Group`, COUNT(*) AS cnt
+    FROM fixed_data
+    GROUP BY `Region`, `Income Group`
+),
+high_income AS (
+    SELECT `Region`, SUM(CASE WHEN `Income Group` = 'High income' THEN cnt ELSE 0 END) AS high_cnt
+    FROM base
+    GROUP BY `Region`
+),
+upper_middle AS (
+    SELECT `Region`, SUM(CASE WHEN `Income Group` = 'Upper middle income' THEN cnt ELSE 0 END) AS upper_cnt
+    FROM base
+    GROUP BY `Region`
+),
+lower_middle AS (
+    SELECT `Region`, SUM(CASE WHEN `Income Group` = 'Lower middle income' THEN cnt ELSE 0 END) AS lower_cnt
+    FROM base
+    GROUP BY `Region`
+),
+low_income AS (
+    SELECT `Region`, SUM(CASE WHEN `Income Group` = 'Low income' THEN cnt ELSE 0 END) AS low_cnt
+    FROM base
+    GROUP BY `Region`
+),
+region_totals AS (
+    SELECT `Region`, SUM(cnt) AS region_total
+    FROM base
+    GROUP BY `Region`
+),
+overall_total AS (
+    SELECT COUNT(*) AS total_cnt FROM fixed_data
+)
+SELECT 
+    h.`Region`,
+    ROUND(h.high_cnt * 100.0 / (SELECT total_cnt FROM overall_total), 2) AS `High income`,
+    ROUND(u.upper_cnt * 100.0 / (SELECT total_cnt FROM overall_total), 2) AS `Upper middle income`,
+    ROUND(l.lower_cnt * 100.0 / (SELECT total_cnt FROM overall_total), 2) AS `Lower middle income`,
+    ROUND(low.low_cnt * 100.0 / (SELECT total_cnt FROM overall_total), 2) AS `Low income`,
+    ROUND(r.region_total * 100.0 / (SELECT total_cnt FROM overall_total), 2) AS Total
+FROM high_income h
+JOIN upper_middle u ON h.`Region` = u.`Region`
+JOIN lower_middle l ON h.`Region` = l.`Region`
+JOIN low_income low ON h.`Region` = low.`Region`
+JOIN region_totals r ON h.`Region` = r.`Region`
+ORDER BY h.`Region`;
+""")
+
+```
+
+## Task 21
+
+```{python}
+## ANOTHER DUNK!  Using the resulting table CTEs from Task 19,
+## print a table listing the number, totals and percentage of countries
+## by income category.
+
+## (This is much simpler than task 20!)
+
+run_sql_and_return_html(cnx,"""
+WITH fixed_data AS (
+    SELECT 
+        CASE 
+            WHEN `Country Code` = 'VEN' THEN 'High income'
+            ELSE `Income Group`
+        END AS `Income Group`
+    FROM my_wdi_country
+),
+base AS (
+    SELECT `Income Group`, COUNT(*) AS "# of Countries"
+    FROM fixed_data
+    GROUP BY `Income Group`
+),
+overall_total AS (
+    SELECT COUNT(*) AS "Total Countries"
+    FROM fixed_data
+)
+SELECT 
+    base.`Income Group`,
+    base.`# of Countries`,
+    (SELECT `Total Countries` FROM overall_total) AS "Total Countries",
+    ROUND(base.`# of Countries` * 100.0 / (SELECT `Total Countries` FROM overall_total), 1) AS "Percent Total"
+FROM base
+CROSS JOIN overall_total
+ORDER BY base.`# of Countries` DESC;
+""")
+
+```
+
+
+# Reflection
+
+1. Reflect on the SQL skills you used throughout these exercises. Which skills do you feel most confident in, and which do you think need more practice? How has this assignment helped you build or reinforce specific SQL competencies?
+
+I feel rather confident in my ability to select from tables, group and order them. I also feel confident and comortable doing more basic SQL arithmatic but the later tasks did prove more difficult. They showed that I still require some practice. Due to the difficulty of the later tasks, they built compentency in my ability to complete more complicated arithmatic. The earlier tasks reinforced what we have learned throughout the semester as we worked on SQL.
+
+2. Problem-Solving Approach: Describe your approach to tackling the more complex tasks (like Tasks 18, 23, and 24). How did you break down these problems, and what steps did you take when you encountered challenges? How would you approach a similar problem differently in the future?
+
+For Task 18 I tried to break the problem down into smaller more manageable SQL pieces and verify each part in the HTML before combining them. I identified the distinct regions, the distinct income groups and the existing region, income group pairs. Then I used a cross join to generate all combinations folllowed by a left join to isolate the missing ones. When something didn't look right, I ran each CTE on its own to check row counts and logic. I found this approach to be the most effective and would likely approach other problems like this as well.
+
+
+3. Learning Takeaways: Consider the overall learning experience from this assignment. What were the biggest takeaways about working with SQL for data analysis and transformation? How do you think these skills will apply in real-world scenarios or future coursework?
+
+SQL is really useful for managing databases and considering I plan to work in software development in the future I can see this being used rather frequently. It can get rather complex at times, as we see in Task 18, but the challenge feels rewarding and achievable. Most tasks feel daunting while SQL seems more achievable when assigned something.
+
+
+# README
+
+Below is the README from my project.
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::

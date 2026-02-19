@@ -1,0 +1,381 @@
+---
+title: Homework 7 - More on joins
+format:
+    html:
+        self-contained: true
+        embed-resources: true
+        standalone: true
+---
+
+In this report, the database schema is presented, loaded, and explored through a series of example SQL queries. These examples highlight the use of JOINs, LEFT JOINs, GROUP BY, HAVING, and aggregate functions to answer questions such as identifying people with certain skills, listing unused skills or roles, and determining how many skills each person has acquired. The goal of this assignment is to further develop fluency with multi-table relational queries and to better understand how data relationships are structured and retrieved in SQL.
+
+GITHUB URL:  <https://github.com/cmsc-vcu/cmsc408-fa2025-hw7-template>
+
+```{python}
+from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file
+
+# Load these variables from .env file.
+config_map = {
+  'user': "MYSQL_USERNAME",
+  'password': "MYSQL_PASSWORD",
+  'host': "MYSQL_HOSTNAME",
+  'database': "HW7_DB_NAME"
+}
+
+cnx,config = create_db_wrapper( config_map )
+  
+```
+
+## Overview and description
+
+This document builds on previous work with relational databases by extending the schema to include skills, roles, and the relationships that link them to people. The database represents a small organizational environment where each person may hold one or more roles and may have acquired one or more skills over time. The tables people, skills, and roles define core entities, while the junction tables peopleskills and peopleroles track these many-to-many relationships.
+
+## Crows-foot diagram
+
+The Crow’s-foot diagram below illustrates the structure of the database used in this project. The core entity is people, representing individuals in the organization. Each person may acquire multiple skills and may also hold one or more roles. The tables peopleskills and peopleroles serve as junction tables that manage these many-to-many relationships. Similarly, each skill may be associated with multiple people, and each role may be assigned to multiple people. This diagram shows the entities, and their key attributes that define how they relate within the schema.
+
+```{mermaid}
+%%| echo: false
+---
+title: Crows-Foot Diagram of Tables and Relationships
+---
+erDiagram
+
+PEOPLE ||--o{ PEOPLESKILLS : acquired
+SKILLS ||--o{ PEOPLESKILLS : acquired
+
+PEOPLE ||--o{ PEOPLEROLES : assigned
+ROLES  ||--o{ PEOPLEROLES : defines
+
+PEOPLE {
+    int people_id PK
+    varchar people_first_name
+    varchar people_last_name
+    varchar email
+    varchar linkedin_url
+    varchar headshot_url
+    varchar discord_handle
+    varchar brief_bio
+    date date_joined
+}
+
+SKILLS {
+    int skills_id PK
+    varchar skills_name
+    varchar description
+    varchar tag
+    varchar url
+    varchar time_commitment
+}
+
+ROLES {
+    int role_id PK
+    varchar role_name
+    int sort_priority
+}
+
+PEOPLESKILLS {
+    int peopleskills_id PK
+    int skills_id FK
+    int people_id FK
+    date date_acquired
+}
+
+PEOPLEROLES {
+    int peopleroles_id PK
+    int people_id FK
+    int role_id FK
+    date date_assigned
+}
+```
+
+## Loading the database
+
+```{python}
+#| output: asis
+
+ddl_file_name = "./my-ddl.sql"
+messages,errors = execute_ddl_from_file( ddl_file_name, cnx)
+
+if errors:
+    for error in errors:
+        print(f"{error}<br/>")
+else:
+    print(f"No errors detected while loading: {ddl_file_name}")
+```
+
+
+## Examples of data in the database
+
+The following sections provide an overview of the schema including table names, and number of rows and columns in each table.
+
+For the people, skills, and roles tables, a description of each table is presented along with it's contents.
+
+### Tables and metrics in the database
+
+```{python}
+#| echo: false
+
+try:
+    # Get table names and column counts
+    col_df = run_sql_and_return_df(cnx,"""
+        SELECT table_name as "table_name", COUNT(*) AS column_count
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+        GROUP BY table_name;
+    """)
+
+    # Build dynamic row count queries using the table list
+    col_df['count_query'] = col_df['table_name'].apply(
+        lambda name: f"SELECT '{name}' AS table_name, COUNT(*) AS row_count FROM `{name}`"
+    )
+
+    # Combine the queries into a single UNION ALL
+    full_query = "\nUNION ALL\n".join(col_df['count_query'].tolist())
+
+    # Execute the UNION ALL query to get row counts
+    row_df = run_sql_and_return_df(cnx,full_query)
+
+    import pandas as pd
+
+    # Merge with column counts
+    summary_df = pd.merge(row_df, col_df[['table_name', 'column_count']], on='table_name')
+
+except:
+    import pandas as pd
+
+    # Create a DataFrame with the given text
+    summary_df = pd.DataFrame({
+        "Error message": [
+            "Your database setup is incorrect. Check your credentials (username, etc.) "
+            "and verify that you're using HW7_DB_NAME in your .env file."
+        ]
+    })
+
+current_width = pd.get_option("display.max_colwidth")
+pd.set_option("display.max_colwidth", None)
+summary_df
+```
+```{python}
+#| echo: false
+pd.set_option("display.max_colwidth", current_width )
+```
+
+### People table
+
+The *people* table stores information about each individual in the organization. It includes identifying attributes such as id and last name, as well as optional descriptive details like first name, email, LinkedIn profile, headshot URL, Discord handle, and a short biography. The `date_joined` field records when the person became part of the organization. Each person is uniquely identified by `people_id`.
+
+Below is a list of data in the *people* table.
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT
+    people_id,
+    people_first_name,
+    people_last_name,
+    email,
+    linkedin_url,
+    headshot_url,
+    discord_handle,
+    brief_bio,
+    date_joined
+FROM people
+ORDER BY people_id;
+""" )
+```
+
+### Skills table
+
+The *skills* table stores information about specific technical or professional competencies that individuals may acquire. Each skill has an id, name, a descriptive summary, and a tagged category label. Optional fields include a reference URL for learning resources and an estimate of the time commitment required to develop the skill. Each skill is uniquely identified by `skills_id`.
+
+Below is a list of data in the *skills* table.
+
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT
+    skills_id,
+    skills_name,
+    description,
+    tag,
+    url,
+    time_commitment
+FROM skills
+ORDER BY skills_id;
+""" )
+```
+
+### Roles table
+
+The *roles* table defines the different organizational roles that a person may hold, such as leadership positions or functional responsibilities. Each role has an id, a descriptive name and a `sort_priority` value, which is used to order roles in reports or displays. Every role is uniquely identified by `role_id`.
+
+Below is a list of data in the *roles* table.
+
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT
+    role_id,
+    role_name,
+    sort_priority
+FROM roles
+ORDER BY role_id;
+""" )
+```
+
+## Sample queries
+
+### List skill names of Person 5
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT s.skills_name AS skills_name
+FROM skills s
+JOIN peopleskills ps on s.skills_id = ps.skills_id
+WHERE ps.people_id = 5
+ORDER BY s.skills_name;
+""" )
+```
+
+### List people with Skill 2
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT p.people_first_name AS first_names, p.people_last_name AS last_names
+FROM people p
+JOIN peopleskills ps on p.people_id = ps.people_id
+WHERE ps.skills_id = 2
+ORDER BY p.people_last_name;
+""" )
+```
+
+### List people with a DEVELOPER role
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT p.people_first_name AS first_names, p.people_last_name AS last_names
+FROM people p
+JOIN peopleroles pr on p.people_id = pr.people_id
+WHERE pr.role_id = 2
+ORDER BY p.people_last_name;
+""" )
+```
+
+### List names and email addresses of people without skills
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT p.people_first_name AS first_name, p.people_last_name AS last_name, p.email AS email
+FROM people p
+LEFT JOIN peopleskills ps on p.people_id = ps.people_id
+WHERE ps.skills_id IS NULL
+ORDER BY last_name;
+""" )
+```
+
+### List names and tags of unused skills
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT s.skills_name AS skills_name, s.tag AS tag
+FROM skills s
+LEFT JOIN peopleskills ps on s.skills_id = ps.skills_id
+WHERE ps.peopleskills_id IS NULL
+ORDER BY s.tag;
+""" )
+```
+
+### List people names and skill names with the BOSS role
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT 
+    p.people_first_name AS first_name,
+    p.people_last_name AS last_name,
+    GROUP_CONCAT(s.skills_name ORDER BY s.skills_name SEPARATOR ', ') AS skills_list
+FROM people p
+JOIN peopleroles pr on p.people_id = pr.people_id
+JOIN roles r on pr.role_id = r.role_id
+JOIN peopleskills ps on p.people_id = ps.people_id
+JOIN skills s on ps.skills_id = s.skills_id
+WHERE r.role_id = 5
+GROUP BY p.people_first_name, p.people_last_name
+ORDER BY p.people_last_name;
+""" )
+```
+
+### List ids and names of unused roles
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT r.role_id AS id, r.role_name as name
+FROM roles r
+LEFT JOIN peopleroles pr on pr.role_id = r.role_id
+WHERE pr.peopleroles_id IS NULL
+ORDER BY r.role_id;
+""" )
+```
+
+### List people and the number of skills they have acquired.
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT 
+    p.people_first_name AS first_name,
+    p.people_last_name AS last_name,
+    COUNT(ps.skills_id) AS number_of_skills
+FROM people p
+LEFT JOIN peopleskills ps on p.people_id = ps.people_id
+GROUP BY p.people_first_name, p.people_last_name;
+""" )
+```
+
+### List each skill and the number of people who have acquired it.
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT
+    s.skills_name AS skill_names,
+    COUNT(ps.skills_id) AS acquired_skills
+FROM skills s
+LEFT JOIN peopleskills ps on s.skills_id = ps.skills_id
+GROUP BY s.skills_name, s.skills_id
+""" )
+```
+
+### List all people who have acquired more than 2 skills
+
+```{python}
+run_sql_and_return_html( cnx,f"""
+SELECT
+    p.people_first_name AS first_name,
+    p.people_last_name AS last_name,
+COUNT(ps.skills_id) AS number_of_skills
+FROM people p
+JOIN peopleskills ps ON p.people_id = ps.people_id
+GROUP BY p.people_id, p.people_first_name, p.people_last_name
+HAVING COUNT(ps.skills_id) > 2
+ORDER BY p.people_last_name, p.people_first_name;
+""" )
+```
+
+## Reflection
+
+What did you like most about this project?
+: Learning more about how to use SQL. I can see a lot of situations where I would be interested in using it for myself.
+
+What was most challenging about this project?
+: Getting used to the new Join, Order and Group commands.
+
+What would you do different next time?
+: Nothing really. Manage time for learning SQL for previous tasks better.
+
+
+# README
+
+Below is the README from my project.
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::
+

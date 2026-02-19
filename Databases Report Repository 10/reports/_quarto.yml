@@ -1,0 +1,21 @@
+
+
+author:
+    - name: Vladimir Paraschiv
+      email: paraschivv@vcu.edu
+
+date: December 06, 2025
+
+jupyter: hw10-kernal
+format:
+    html:
+        theme: cosmo
+        toc: false
+        embed-resources: true
+        code-copy: true
+
+execute:
+  echo: true
+  eval: true
+  cache: false
+

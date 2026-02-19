@@ -1,0 +1,492 @@
+---
+title: Homework 10 - World Bank Life Expectancy & Analytic Functions
+format:
+    html:
+        self-contained: true
+        embed-resources: true
+        standalone: true
+---
+
+GITHUB URL: <https://github.com/cmsc-vcu/cmsc408-fa2025-hw10-CaptnKristmas>
+
+This assignment introduces **analytic (window) functions** using real-world data from the World Bank.  
+You will extend your work from HW8 and HW9 by:
+
+- Creating local tables for **country**, and **stacked life expectancy**
+- Using **window functions** to analyze long-term changes
+- Combining **life expectancy**, **population**, and **region** in a signature capstone task
+
+As always:  **DO NOT move or remove Python code blocks.**  The autograder depends on their order.
+
+# Problem Background
+
+We will analyze **Life Expectancy at Birth (Indicator Code: `SP.DYN.LE00.IN`)** for all countries, from **1960–2023**.
+
+You will:
+
+1. Create a local copy of `wdi_country`, filtered to include only true countries  
+2. Dynamically generate a stacked life-expectancy table using Python  
+3. Apply window functions to:
+   - compute lag/lead differences  
+   - rank countries  
+   - calculate moving averages  
+   - create region-level analytic aggregations  
+4. Finish with a **signature capstone** using all three tables:
+   - life expectancy (stacked)  
+   - population (wide format)  
+   - region (country table)  
+
+Like the previous assignments, slowly work your way through this one, one task at a time in VSCODE.
+
+```{python}
+# Load the helpers and connect to the database
+from helpers import create_database_engine, run_sql_and_return_df, run_sql_and_return_html, create_db_wrapper, execute_ddl_from_file, execute_ddl
+from itables import show
+
+# Load from .env file
+config_map = {
+  'user': "MYSQL_USERNAME",
+  'password': "MYSQL_PASSWORD",
+  'host': "MYSQL_HOSTNAME",
+  'database': "HW10_DB_NAME"
+}
+
+cnx, config = create_db_wrapper(config_map)
+```
+
+
+```{python}
+# Quick check: confirm your access to world_bank_data tables
+run_sql_and_return_html(cnx, """
+select table_schema, table_name, table_rows
+from information_schema.tables
+where table_schema = 'world_bank_data'
+  and table_name like 'wdi%%';
+""")
+```
+
+
+# Exercises
+
+
+## Task 1
+
+Create a *local copy* of wdi_country with only true countries (exclude aggregates and regions).  You might consider
+copying from your personal HW8 or HW9 database rather than going back to the original `world_bank_data`
+database.  For example, my older table is named `fa25_jdleonard_hw8.wdi_country`.
+
+```{python}
+# Drop local copy in current (HW10) database. 
+execute_ddl(cnx, """
+DROP TABLE IF EXISTS wdi_country;
+""")
+```
+
+YOU need to write this code ...
+
+
+```{python}
+# Create new table of countries only.  You can copy from a previous assignment's database, or from `world_bank_data`.  Don't forget to fix Venezuela!
+execute_ddl(cnx, """
+CREATE TABLE fa25_paraschivv_hw10.wdi_country AS
+SELECT `Country Code`, `Short Name`, `Table Name`, `Long Name`, `2-alpha code`, `Currency Unit`, `Special Notes`, `Region`,
+CASE WHEN `Country Code` = 'VEN' then 'High income' else `Income Group` end AS `Income Group`,
+`WB-2 code`, `National accounts base year`, `National accounts reference year`, `SNA price valuation`, `Lending category`, `Other groups`, `System of National Accounts`, `Alternative conversion factor`, `PPP survey year`, `Balance of Payments Manual in use`, `External debt Reporting status`, `System of trade`, `Government Accounting concept`, `IMF data dissemination standard`, `Latest population census`, `Latest household survey`, `Source of most recent Income and expenditure data`, `Vital registration complete`, `Latest agricultural census`, `Latest industrial data`, `Latest trade data`, `Latest water withdrawal data`
+FROM fa25_paraschivv_hw8.my_wdi_country;
+""")
+```
+
+```{python}
+run_sql_and_return_html(cnx, """
+SELECT `Country Code`, `Short Name`, `Income Group`
+FROM wdi_country
+WHERE `Country Code` = 'VEN';
+""")
+```
+
+And this should return 217 - the number of countries!
+
+```{python}
+# Verify record count to ensure that it's countries only.
+run_sql_and_return_html(cnx, "select count(*) from wdi_country;")
+```
+
+
+## Task 2
+
+In the last homework assigment we explored `wide` vs `stacked` data and learned that for most cases `stacked` data is much easier to manage.
+
+Let's create a `wdi_stacked_data` table for our life-expectancy indicator.
+
+This Python block **builds the UNION ALL SQL** used to stack 64 year-columns into a simple table with:
+
+| country_code | indicator_code | year_code | value |
+
+I'm providing you this task already complete.  Run it exactly as-is.  Take a look at the code and see how it works.
+
+THIS IS A COMMON data science database pattern - using an external language to create a fully formed query, then running the query.  Trying to build this query in pure SQL is a pain, and is often platform specific.
+
+```{python}
+# Generate a list of years
+years = list(range(1960, 2023))
+
+# Build the SELECT ... UNION ALL ... SELECT ...
+select_blocks = []
+for y in years:
+    select_blocks.append(
+        f"SELECT country_code, indicator_code, '{y}' AS year_code, `{y}` AS value FROM base"
+    )
+
+union_sql = "\nUNION ALL\n".join(select_blocks)
+
+final_sql = f"""
+DROP TABLE IF EXISTS wdi_data_stacked;
+
+CREATE TABLE wdi_data_stacked AS
+WITH base AS (
+    SELECT
+        d.`Country Code` AS country_code,
+        d.`Indicator Code` AS indicator_code,
+        d.*
+    FROM world_bank_data.wdi_data d
+    WHERE d.`Indicator Code` = 'SP.DYN.LE00.IN'
+        and d.`Country Code` in (select `Country Code` from wdi_country)
+)
+{union_sql};
+commit;
+create index country_code_idx02 on wdi_data_stacked (country_code);
+commit;
+"""
+```
+
+Here is the SQL block that gets created:
+
+```{python}
+print(final_sql)
+```
+
+Now run it ... (it might take a while) ...
+
+```{python}
+# Run the query
+x = execute_ddl(cnx, final_sql)
+```
+
+And inspect the first 10 records:
+
+```{python}
+run_sql_and_return_html(cnx, "SELECT country_code AS `Country Code`, indicator_code AS `Indicator Code`, year_code AS `Year Code`, value AS Value FROM wdi_data_stacked LIMIT 10;")
+```
+
+
+And then look at the USA
+
+```{python}
+run_sql_and_return_html(cnx,"""
+SELECT country_code AS "Country Code", indicator_code AS "Indicator Code", year_code AS "Year Code", value AS Value
+FROM wdi_data_stacked
+where country_code = 'USA'
+order by indicator_code, year_code
+""")
+```
+
+How many records total?
+
+```{python}
+run_sql_and_return_html(cnx,"""
+SELECT count(*) as 'Total Records' from wdi_data_stacked
+""")
+```
+
+## Task 3
+
+Let's learn a little about the indicator that we're going to use by reviewing the metadata from the `wdi_series` table.
+
+```{python}
+# Let's look at 
+run_sql_and_return_html(cnx, """
+SELECT `Series Code`, `Indicator Name`, `Long Definition`, `Topic`
+FROM world_bank_data.wdi_series
+WHERE `Series Code` LIKE 'SP.DYN.LE00.IN';
+""")
+```
+
+
+## Task 4
+
+Let's look at the life expectancy data by country. Produce a table with 6 columns:
+
+| Short name | country code | year1 | value1 | year2 | value2 |
+
+where
+
+* value1 is the *earliest* non-null value and year1 is the year associated with that value, and
+
+* value2 is the *latest* non-null value and year2 is the year associated with that value
+
+ORDER the table by `Short Name` and show only the first 10 rows.
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH first_last_years AS (
+SELECT d.country_code,
+MIN(d.year_code) AS year1,
+MAX(d.year_code) AS year2
+FROM wdi_data_stacked d
+WHERE d.value is not NULL
+GROUP BY d.country_code
+),
+first_values AS (
+SELECT f.country_code, f.year1,
+d.value AS value1
+FROM first_last_years f
+JOIN wdi_data_stacked d
+ON d.country_code = f.country_code and d.year_code = f.year1
+WHERE d.value is not NULL
+),
+last_values AS (
+SELECT f.country_code, f.year2, d.value AS value2
+FROM first_last_years f
+JOIN wdi_data_stacked d
+ON d.country_code = f.country_code and d.year_code = f.year2
+WHERE d.value is not NULL
+)
+SELECT c.`Short Name`, f.country_code AS "Country Code", f.year1 AS "First Year", f.value1 AS "First Value", l.year2 AS "Last Year", l.value2 AS "Last Value"
+FROM first_values f
+JOIN last_values l
+ON f.country_code = l.country_code
+JOIN wdi_country c
+ON c.`Country Code` = f.country_code
+ORDER BY c.`Short Name`
+Limit 10;
+""")
+```
+
+
+## Task 5
+
+Prepare a CTE that contains:
+
+| Short Name (from wdi_country) | year | value | prev_value | delta |
+
+where:
+
+* prev_value is the life expectancy value from the previous row in the table, and
+
+* delta is the difference between value and prev_value.  This is the change in life expectency from the previous year to the current year.
+
+Then filter the CTE to show just the USA for years 1970 to 1990.
+
+Your resulting table should have 21 rows and 5 columns for just the `United States` in the first column.
+
+Your CTE should use LAG () OVER ( PARTITION BY ... ORDER BY ...)
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH life_with_prev AS (
+SELECT c.`Short Name` AS `Short Name`,
+CAST(d.year_code AS UNSIGNED) AS Year, d.value AS Value,
+LAG(d.value) OVER(
+PARTITION BY c.`Short Name`
+ORDER BY CAST(d.year_code AS UNSIGNED)
+) AS `Last Value`
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+),
+life_deltas AS (
+SELECT `Short Name`, Year, Value, `Last Value`, Value - `Last Value` AS Delta
+FROM life_with_prev
+)
+SELECT `Short Name`, Year, Value, `Last Value`, Delta
+FROM life_deltas
+WHERE `Short Name` = 'United States' and Year BETWEEN 1970 and 1990
+ORDER BY Year;
+""")
+```
+
+## Task 6
+
+OK - You're getting the hang of things.  You can now use the LAG function to look at previous rows within specific partitions and compute changes from row=to-row, in this case, year-to-year.
+
+Now - Over the entire wdi_data_stacked table, find the top 10 countries and years with the largest single-year improvements.
+
+You should use the CTE from the previous task - it provides you with the value and previous year value.  You're looking for the top 10 deltas and years.
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH life_with_prev AS (
+SELECT c.`Short Name` AS `Short Name`, d.country_code AS `Country Code`,
+CAST(d.year_code AS UNSIGNED) AS Year, d.value AS Value,
+LAG(d.value) OVER(
+PARTITION BY d.country_code
+ORDER BY CAST(d.year_code AS UNSIGNED)
+) AS `Last Value`
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+),
+life_deltas AS (
+SELECT `Short Name`, `Country Code`, Year, Value, `Last Value`, Value - `Last Value` AS Delta
+FROM life_with_prev
+)
+SELECT `Short Name`, `Country Code`, Year, Value, `Last Value`, Delta
+FROM life_deltas
+WHERE `Last Value` is not NULL
+ORDER BY Delta DESC
+LIMIT 10;
+""")
+```
+
+Wow - what was going on in these countries during those years?
+
+## Task 7
+
+Year-over-year changes tend to be volatile and spiky.  Using windowing functions, let's calculate a 3-year moving average for all countries then compare year-over-year 3-year averages.  Find top 10 countries with the largest 3-year rolling average DECREASE.
+
+Compute:
+
+`AVG(value) OVER (PARTITION BY country ORDER BY year ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)`
+
+Return:
+
+| country | year | value | mov_avg_3 |
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH rolling AS (
+SELECT c.`Short Name` AS Country, d.country_code AS country_code,
+CAST(d.year_code AS UNSIGNED) AS Year,
+d.value AS Value, 
+AVG(d.value) OVER (
+PARTITION BY d.country_code
+ORDER BY CAST(d.year_code AS UNSIGNED)
+ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS mov_avg_3
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+),
+with_delta AS (
+SELECT Country, country_code, Year, Value, mov_avg_3, mov_avg_3 - LAG (mov_avg_3) OVER(PARTITION BY country_code
+ORDER BY Year
+) AS mov_delta
+FROM rolling
+)
+SELECT Country, Year, Value, mov_avg_3 AS `3 Year Mov. Avg.`, mov_delta AS `Avg. Delta`
+FROM with_delta
+WHERE mov_delta is not NULL
+ORDER BY mov_delta ASC
+LIMIT 10;
+""")
+```
+
+Again, WOW - what was happening in those countries during those year?
+
+## Task 8
+
+Rank all countries by life expectency in 2022.  Your table should include:
+
+| rank | country | life_expectancy_2022 |
+
+Use the RANK() OVER () command.  I recommend creating a CTE
+that ranks all countries over all years, then select the top 10 for 2022.
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH ranked AS (
+SELECT c.`Short Name` AS Country, d.country_code AS `Country Code`,
+CAST(d.year_code AS UNSIGNED) AS Year, d.value AS `Life Expectancy 2022`,
+RANK() OVER (
+PARTITION BY CAST(d.year_code AS UNSIGNED)
+ORDER BY d.value DESC
+) AS "Rank"
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+WHERE d.value is not NULL
+)
+SELECT `Rank`, Country, `Life Expectancy 2022`
+FROM ranked
+WHERE Year = 2022
+ORDER by `Rank`
+LIMIT 10;
+""")
+```
+
+## Task 9
+
+Create a CTE listing ranking countries by life expectancy within their respective
+regions, then print a table showing the top countries and their life expectancies
+within each region for 2022.
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH regional_ranks AS (
+SELECT c.`Region` AS Region, c.`Short Name` AS Country, d.country_code AS `Country Code`,
+CAST(d.year_code AS UNSIGNED) AS Year,
+ROUND(d.value, 2) AS `Life Expectancy 2022`,
+RANK() OVER (
+PARTITION BY c.`Region`,
+CAST(d.year_code AS UNSIGNED)
+ORDER BY d.value DESC
+) as `Regional Rank`
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+WHERE d.value is not NULL
+)
+SELECT Region, Country, `Country Code`, `Life Expectancy 2022`, `Regional Rank`
+FROM regional_ranks
+WHERE Year = 2022 and `Regional Rank` = 1
+ORDER BY Region;
+""")
+```
+
+## Task 10
+
+Create a CTE listing ranking countries by life expectancy within their respective
+income groups, then print a table showing the top countries and their life expectancies
+within each income group for 2022.
+
+```{python}
+run_sql_and_return_html(cnx, """
+WITH income_ranks AS (
+SELECT c.`Income Group` AS `Income Group`, c.`Short Name` AS Country, d.country_code AS `Country Code`,
+CAST(d.year_code AS UNSIGNED) AS Year, d.value AS `Life Expectancy 2022`,
+RANK() OVER (
+PARTITION BY c.`Income Group`,
+CAST(d.year_code AS UNSIGNED)
+ORDER BY d.value DESC
+) AS `Income Rank`
+FROM wdi_data_stacked d
+JOIN wdi_country c
+ON c.`Country Code` = d.country_code
+WHERE d.value is not NULL
+)
+SELECT `Income Group`, Country, `Country Code`,`Life Expectancy 2022`, `Income Rank`
+FROM income_ranks
+WHERE Year = 2022 and `Income Rank` = 1
+ORDER BY `Income Group`;
+""")
+```
+
+# Reflection
+
+1. Which window functions felt most intuitive, and which required the most care?
+
+Task 5 felt the most intuitive while Task 7 gave me the most trouble. None of the tasks took me too much time as such I can't say any of them were unintuitive specifically.
+
+2. How did stacking the data enable the use of analytic functions?
+
+Stacking the data converted the original wide, year by year column format into a long, row based format with year and value fields. This is required for window functions to operate properly. Once each country's life expectancy values were represented as ordered rows over time, functions like lag, rank and moving averages could be appled using using partition by and order by. This was done to compare values across years within the same country or group. Without stacking, year to year comparisons, running averages, rankings by year, and trend analysis would have required complex, repetitive column by column logic instead of clean and scalable window function queries.
+
+3. What insights did the final capstone reveal about regional development patterns?
+
+The final capstone showed that regional development is both unequal and volatile. Wealthy regions like Europe & Central Asia and East Asia & Pacific consistently have the highest life expectancy. However, within poorer regions there are standout success stories such as Cabo Verde and Maldives that outperform their neighbors. The lag and moving-average work also revealed how fragile progress can be: countries like Rwanda, Cambodia, South Sudan, and the Central African Republic experienced huge jumps or drops tied to conflict, recovery, or crises, so simple regional averages hide a lot of turbulence. Overall, the analysis suggested that while income level and region matter, country-specific policies and shocks strongly shape health outcomes over time.
+
+
+# README
+
+::: {style="background:lightgray; margin-left:20px; border-top: 3px solid black; border-bottom: 3px solid black; padding-left:20px; padding-right:20px"}
+{{< include ../README.md >}}
+:::
